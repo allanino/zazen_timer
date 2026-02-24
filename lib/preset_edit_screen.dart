@@ -5,7 +5,9 @@ import 'minute_picker_screen.dart';
 import 'package:flutter/services.dart';
 
 class PresetEditScreen extends StatefulWidget {
-  const PresetEditScreen({super.key});
+  final SessionPreset? preset;
+
+  const PresetEditScreen({super.key, this.preset});
 
   @override
   State<PresetEditScreen> createState() => _PresetEditScreenState();
@@ -16,10 +18,7 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
       TextEditingController(text: 'New preset');
   final FocusNode _nameFocusNode = FocusNode();
   String _lastReportedText = '';
-  final List<_EditableStep> _steps = <_EditableStep>[
-    _EditableStep(type: StepType.preStart, minutes: 5),
-    _EditableStep(type: StepType.zazen, minutes: 40),
-  ];
+  final List<_EditableStep> _steps = <_EditableStep>[];
 
   @override
   void dispose() {
@@ -35,6 +34,19 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.preset != null) {
+      _nameController.text = widget.preset!.name;
+      for (final SessionStep s in widget.preset!.steps) {
+        _steps.add(_EditableStep(type: s.type, minutes: s.duration.inMinutes));
+      }
+    } else {
+      _nameController.text = 'New preset';
+      _steps.addAll(<_EditableStep>[
+        _EditableStep(type: StepType.preStart, minutes: 5),
+        _EditableStep(type: StepType.zazen, minutes: 40),
+      ]);
+    }
+
     _lastReportedText = _nameController.text;
     _nameController.addListener(_nameListener);
   }
@@ -112,7 +124,7 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
     }
 
     final SessionPreset preset = SessionPreset(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: widget.preset?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
       name: name,
       steps: steps,
     );
@@ -125,7 +137,7 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('New preset'),
+        title: Text(widget.preset != null ? 'Edit preset' : 'New preset'),
         centerTitle: true,
         actions: <Widget>[
           IconButton(
