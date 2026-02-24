@@ -19,6 +19,13 @@ class _StartTimePickerScreenState extends State<StartTimePickerScreen> {
   late FixedExtentScrollController _hourController;
   late FixedExtentScrollController _minuteController;
   late FixedExtentScrollController _secondController;
+  static const int _hourCount = 24;
+  static const int _minuteCount = 60;
+  static const int _secondCount = 60;
+  static const int _loopMultiplier = 1000;
+  late final List<Widget> _hourWidgets;
+  late final List<Widget> _minuteWidgets;
+  late final List<Widget> _secondWidgets;
 
   @override
   void initState() {
@@ -26,9 +33,42 @@ class _StartTimePickerScreenState extends State<StartTimePickerScreen> {
     _hour = widget.initialTime.hour;
     _minute = widget.initialTime.minute;
     _second = 0;
-    _hourController = FixedExtentScrollController(initialItem: _hour);
-    _minuteController = FixedExtentScrollController(initialItem: _minute);
-    _secondController = FixedExtentScrollController(initialItem: _second);
+    // Build widget lists for looping delegates
+    _hourWidgets = List<Widget>.generate(_hourCount, (int index) {
+      return Center(
+        child: Text(
+          index.toString().padLeft(2, '0'),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+    });
+    _minuteWidgets = List<Widget>.generate(_minuteCount, (int index) {
+      return Center(
+        child: Text(
+          index.toString().padLeft(2, '0'),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+    });
+    _secondWidgets = List<Widget>.generate(_secondCount, (int index) {
+      return Center(
+        child: Text(
+          index.toString().padLeft(2, '0'),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+    });
+
+    // Place initial items in the middle of the looping range so user can scroll both ways
+    _hourController = FixedExtentScrollController(initialItem: _loopMultiplier * _hourCount + _hour);
+    _minuteController = FixedExtentScrollController(initialItem: _loopMultiplier * _minuteCount + _minute);
+    _secondController = FixedExtentScrollController(initialItem: _loopMultiplier * _secondCount + _second);
   }
 
   @override
@@ -75,28 +115,30 @@ class _StartTimePickerScreenState extends State<StartTimePickerScreen> {
                       physics: const FixedExtentScrollPhysics(),
                       onSelectedItemChanged: (int index) {
                         setState(() {
-                          _hour = index;
+                          _hour = index % _hourCount;
                         });
                       },
-                      childDelegate: ListWheelChildBuilderDelegate(
-                        childCount: 24,
-                        builder: (BuildContext context, int index) {
-                          final bool isSelected = index == _hour;
-                          final Color color = isSelected
-                              ? Theme.of(context).colorScheme.primary
-                              : Colors.white70;
-                          final double fontSize = isSelected ? 28 : 20;
-                          return Center(
-                            child: Text(
-                              index.toString().padLeft(2, '0'),
-                              style: TextStyle(
-                                fontSize: fontSize,
-                                fontWeight: FontWeight.bold,
-                                color: color,
+                      childDelegate: ListWheelChildLoopingListDelegate(
+                        children: _hourWidgets.map((Widget child) {
+                          return Builder(builder: (BuildContext context) {
+                            final int value = _hourWidgets.indexOf(child);
+                            final bool isSelected = value == _hour;
+                            final Color color = isSelected
+                                ? Theme.of(context).colorScheme.primary
+                                : Colors.white70;
+                            final double fontSize = isSelected ? 28 : 20;
+                            return Center(
+                              child: Text(
+                                value.toString().padLeft(2, '0'),
+                                style: TextStyle(
+                                  fontSize: fontSize,
+                                  fontWeight: FontWeight.bold,
+                                  color: color,
+                                ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          });
+                        }).toList(),
                       ),
                     ),
                   ),
@@ -107,28 +149,30 @@ class _StartTimePickerScreenState extends State<StartTimePickerScreen> {
                       physics: const FixedExtentScrollPhysics(),
                       onSelectedItemChanged: (int index) {
                         setState(() {
-                          _minute = index;
+                          _minute = index % _minuteCount;
                         });
                       },
-                      childDelegate: ListWheelChildBuilderDelegate(
-                        childCount: 60,
-                        builder: (BuildContext context, int index) {
-                          final bool isSelected = index == _minute;
-                          final Color color = isSelected
-                              ? Theme.of(context).colorScheme.primary
-                              : Colors.white70;
-                          final double fontSize = isSelected ? 28 : 20;
-                          return Center(
-                            child: Text(
-                              index.toString().padLeft(2, '0'),
-                              style: TextStyle(
-                                fontSize: fontSize,
-                                fontWeight: FontWeight.bold,
-                                color: color,
+                      childDelegate: ListWheelChildLoopingListDelegate(
+                        children: _minuteWidgets.map((Widget child) {
+                          return Builder(builder: (BuildContext context) {
+                            final int value = _minuteWidgets.indexOf(child);
+                            final bool isSelected = value == _minute;
+                            final Color color = isSelected
+                                ? Theme.of(context).colorScheme.primary
+                                : Colors.white70;
+                            final double fontSize = isSelected ? 28 : 20;
+                            return Center(
+                              child: Text(
+                                value.toString().padLeft(2, '0'),
+                                style: TextStyle(
+                                  fontSize: fontSize,
+                                  fontWeight: FontWeight.bold,
+                                  color: color,
+                                ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          });
+                        }).toList(),
                       ),
                     ),
                   ),
@@ -139,28 +183,30 @@ class _StartTimePickerScreenState extends State<StartTimePickerScreen> {
                       physics: const FixedExtentScrollPhysics(),
                       onSelectedItemChanged: (int index) {
                         setState(() {
-                          _second = index;
+                          _second = index % _secondCount;
                         });
                       },
-                      childDelegate: ListWheelChildBuilderDelegate(
-                        childCount: 60,
-                        builder: (BuildContext context, int index) {
-                          final bool isSelected = index == _second;
-                          final Color color = isSelected
-                              ? Theme.of(context).colorScheme.primary
-                              : Colors.white70;
-                          final double fontSize = isSelected ? 28 : 20;
-                          return Center(
-                            child: Text(
-                              index.toString().padLeft(2, '0'),
-                              style: TextStyle(
-                                fontSize: fontSize,
-                                fontWeight: FontWeight.bold,
-                                color: color,
+                      childDelegate: ListWheelChildLoopingListDelegate(
+                        children: _secondWidgets.map((Widget child) {
+                          return Builder(builder: (BuildContext context) {
+                              final int value = _secondWidgets.indexOf(child);
+                            final bool isSelected = value == _second;
+                            final Color color = isSelected
+                                ? Theme.of(context).colorScheme.primary
+                                : Colors.white70;
+                            final double fontSize = isSelected ? 28 : 20;
+                            return Center(
+                              child: Text(
+                                value.toString().padLeft(2, '0'),
+                                style: TextStyle(
+                                  fontSize: fontSize,
+                                  fontWeight: FontWeight.bold,
+                                  color: color,
+                                ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          });
+                        }).toList(),
                       ),
                     ),
                   ),
