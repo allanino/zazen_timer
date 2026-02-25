@@ -135,46 +135,101 @@ class _PresetListScreenState extends State<PresetListScreen> {
   }
 
   Future<void> _startPreset(SessionPreset preset) async {
-    final String? choice = await showDialog<String>(
+    final _StartOptions? options = await showDialog<_StartOptions>(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                const Text('Start now or at a specific time?', textAlign: TextAlign.center),
-                const SizedBox(height: 12),
-                Column(
+        bool noDisplay = false;
+        return StatefulBuilder(
+          builder: (BuildContext context, void Function(void Function()) setState) {
+            return AlertDialog(
+              insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              content: SingleChildScrollView(
+                child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    SizedBox(
-                      width: double.infinity,
-                      child: TextButton(
-                        onPressed: () => Navigator.of(context).pop('now'),
-                        child: const Text('Now'),
-                      ),
+                    const Text('Start now or at a specific time?', textAlign: TextAlign.center),
+                    const SizedBox(height: 12),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        SizedBox(
+                          width: double.infinity,
+                          child: TextButton(
+                            onPressed: () => Navigator.of(context).pop(
+                              _StartOptions(
+                                choice: 'now',
+                                noDisplay: noDisplay,
+                              ),
+                            ),
+                            child: const Text('Now'),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: double.infinity,
+                          child: TextButton(
+                            onPressed: () => Navigator.of(context).pop(
+                              _StartOptions(
+                                choice: 'time',
+                                noDisplay: noDisplay,
+                              ),
+                            ),
+                            child: const Text('Pick time'),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const <Widget>[
+                              Text(
+                                'No display',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Keep the screen black while the session runs, using vibrations only.',
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 8),
-                    SizedBox(
-                      width: double.infinity,
-                      child: TextButton(
-                        onPressed: () => Navigator.of(context).pop('time'),
-                        child: const Text('Pick time'),
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Switch(
+                          value: noDisplay,
+                          onChanged: (bool value) {
+                            setState(() {
+                              noDisplay = value;
+                            });
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
 
-    if (!mounted || choice == null) return;
+    if (!mounted || options == null) return;
+
+    final String choice = options.choice;
+    final bool noDisplay = options.noDisplay;
 
     SessionPreset effective = preset;
 
@@ -222,7 +277,10 @@ class _PresetListScreenState extends State<PresetListScreen> {
 
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (BuildContext context) => SessionScreen(preset: effective),
+        builder: (BuildContext context) => SessionScreen(
+          preset: effective,
+          noDisplay: noDisplay,
+        ),
       ),
     );
   }
@@ -427,10 +485,25 @@ class _PresetListScreenState extends State<PresetListScreen> {
   }
 }
 
+class _StartOptions {
+  final String choice; // 'now' or 'time'
+  final bool noDisplay;
+
+  const _StartOptions({
+    required this.choice,
+    required this.noDisplay,
+  });
+}
+
 class SessionScreen extends StatefulWidget {
   final SessionPreset preset;
+  final bool? noDisplay;
 
-  const SessionScreen({super.key, required this.preset});
+  const SessionScreen({
+    super.key,
+    required this.preset,
+    this.noDisplay,
+  });
 
   @override
   State<SessionScreen> createState() => _SessionScreenState();
@@ -527,16 +600,21 @@ class _SessionScreenState extends State<SessionScreen> {
         await _onBackPressed();
       },
       child: Scaffold(
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: CircularTimer(
-              remaining: _remaining,
-              total: _currentTotal,
-              step: _currentStep,
-            ),
-          ),
-        ),
+        backgroundColor: Colors.black,
+        body: (widget.noDisplay ?? false)
+            ? const ColoredBox(
+                color: Colors.black,
+              )
+            : Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: CircularTimer(
+                    remaining: _remaining,
+                    total: _currentTotal,
+                    step: _currentStep,
+                  ),
+                ),
+              ),
       ),
     );
   }
