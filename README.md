@@ -81,3 +81,6 @@ You may want to create a separate Android Wear OS module or integrate this `lib/
 
    The `-r` flag allows replacing an existing install (e.g. a debug build). Open the app from the watch app list.
 
+## License
+
+This project is licensed under the MIT License — see the LICENSE file for details.
