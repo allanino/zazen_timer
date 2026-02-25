@@ -24,7 +24,7 @@ android {
         applicationId = "com.example.zazen_timer"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 25  // 25 required by androidx.wear:wear-ongoing for Ongoing Activity on watch
+        minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -41,9 +41,4 @@ android {
 
 flutter {
     source = "../.."
-}
-
-dependencies {
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.wear:wear-ongoing:1.1.0")
 }

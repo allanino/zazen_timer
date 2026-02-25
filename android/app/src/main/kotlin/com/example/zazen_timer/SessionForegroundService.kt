@@ -11,15 +11,13 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import androidx.core.app.NotificationCompat
-import androidx.wear.ongoing.OngoingActivity
-import androidx.wear.ongoing.Status
+import org.json.JSONArray
 import org.json.JSONObject
 
 class SessionForegroundService : Service() {
 
   private val handler = Handler(Looper.getMainLooper())
   private var tickRunnable: Runnable? = null
-  private var ongoingActivity: OngoingActivity? = null
 
   override fun onCreate() {
     super.onCreate()
@@ -27,7 +25,7 @@ class SessionForegroundService : Service() {
       val channel = NotificationChannel(
         CHANNEL_ID,
         getString(R.string.notification_channel_name),
-        NotificationManager.IMPORTANCE_DEFAULT
+        NotificationManager.IMPORTANCE_LOW
       ).apply { setShowBadge(false) }
       (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
         .createNotificationChannel(channel)
@@ -57,17 +55,14 @@ class SessionForegroundService : Service() {
       remainingSeconds = initialRemaining
     )
 
-    val initialStepType = steps[0].type
-    val notifBuilder = createNotificationBuilder(title, initialRemaining, initialRemaining, initialStepType)
-    val notification = notifBuilder.build()
+    updateNotification(title, initialRemaining, initialRemaining)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
       @Suppress("WrongConstant")
-      startForeground(NOTIFICATION_ID, notification, 0x40000000)
+      startForeground(NOTIFICATION_ID, createNotification(title, initialRemaining, initialRemaining), 0x40000000)
     } else {
       @Suppress("DEPRECATION")
-      startForeground(NOTIFICATION_ID, notification)
+      startForeground(NOTIFICATION_ID, createNotification(title, initialRemaining, initialRemaining))
     }
-    attachOngoingActivity(notifBuilder, title, initialRemaining, initialStepType)
     scheduleTick(title)
     return START_NOT_STICKY
   }
@@ -95,7 +90,7 @@ class SessionForegroundService : Service() {
     if (index >= steps.size) return
 
     val step = steps[index]
-    updateNotification(title, state.remainingSeconds, step.durationSeconds, step.type)
+    updateNotification(title, state.remainingSeconds, step.durationSeconds)
 
     tickRunnable = object : Runnable {
       override fun run() {
@@ -106,7 +101,7 @@ class SessionForegroundService : Service() {
 
         if (s.remainingSeconds > 1) {
           currentState = s.copy(remainingSeconds = s.remainingSeconds - 1)
-          updateNotification(title, s.remainingSeconds - 1, st[i].durationSeconds, st[i].type)
+          updateNotification(title, s.remainingSeconds - 1, st[i].durationSeconds)
           handler.postDelayed(this, 1000)
         } else {
           // Advance to next step
@@ -115,7 +110,7 @@ class SessionForegroundService : Service() {
             val next = st[i + 1]
             currentState = s.copy(stepIndex = i + 1, remainingSeconds = next.durationSeconds)
             onStepTransition(finishedType, next.type)
-            updateNotification(title, next.durationSeconds, next.durationSeconds, next.type)
+            updateNotification(title, next.durationSeconds, next.durationSeconds)
             handler.postDelayed(this, 1000)
           } else {
             HapticHelper.oneLong(this@SessionForegroundService)
@@ -144,48 +139,16 @@ class SessionForegroundService : Service() {
     }
   }
 
-  private fun getStepLabel(stepType: String): String = when (stepType) {
-    "preStart" -> getString(R.string.notification_step_pre_start)
-    "kinhin" -> getString(R.string.notification_step_kinhin)
-    else -> getString(R.string.notification_step_zazen)
-  }
-
-  private fun attachOngoingActivity(notifBuilder: NotificationCompat.Builder, title: String, remainingSeconds: Int, stepType: String) {
-    try {
-      val status = buildStatus(title, remainingSeconds, stepType)
-      val ongoing = OngoingActivity.Builder(this, NOTIFICATION_ID, notifBuilder)
-        .setStatus(status)
-        .build()
-      ongoing.apply(this)
-      ongoingActivity = ongoing
-    } catch (_: Throwable) {
-      ongoingActivity = null
-    }
-  }
-
-  private fun buildStatus(title: String, remainingSeconds: Int, stepType: String): Status {
-    val mins = remainingSeconds / 60
-    val secs = remainingSeconds % 60
-    val timeText = String.format("%d:%02d", mins, secs)
-    val stepLabel = getStepLabel(stepType)
-    return Status.Builder().addTemplate("$title · $stepLabel · $timeText").build()
-  }
-
-  private fun updateNotification(title: String, remainingSeconds: Int, stepDurationSeconds: Int, stepType: String) {
-    val notification = createNotificationBuilder(title, remainingSeconds, stepDurationSeconds, stepType).build()
+  private fun updateNotification(title: String, remainingSeconds: Int, stepDurationSeconds: Int) {
     (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
-      .notify(NOTIFICATION_ID, notification)
-    try {
-      ongoingActivity?.update(this, buildStatus(title, remainingSeconds, stepType))
-    } catch (_: Throwable) { }
+      .notify(NOTIFICATION_ID, createNotification(title, remainingSeconds, stepDurationSeconds))
   }
 
-  private fun createNotificationBuilder(title: String, remainingSeconds: Int, stepDurationSeconds: Int, stepType: String): NotificationCompat.Builder {
+  private fun createNotification(title: String, remainingSeconds: Int, stepDurationSeconds: Int): android.app.Notification {
     val mins = remainingSeconds / 60
     val secs = remainingSeconds % 60
     val timeText = String.format("%d:%02d", mins, secs)
-    val stepLabel = getStepLabel(stepType)
-    val text = getString(R.string.notification_session_step_time, stepLabel, timeText)
+    val text = getString(R.string.notification_session_progress, timeText)
 
     val pendingIntent = PendingIntent.getActivity(
       this,
@@ -200,14 +163,13 @@ class SessionForegroundService : Service() {
       .setSmallIcon(R.mipmap.ic_launcher)
       .setContentIntent(pendingIntent)
       .setOngoing(true)
-      .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-      .setOnlyAlertOnce(true)
+      .setPriority(NotificationCompat.PRIORITY_LOW)
+      .build()
   }
 
   override fun onDestroy() {
     tickRunnable?.let { handler.removeCallbacks(it) }
     tickRunnable = null
-    ongoingActivity = null
     currentState = null
     super.onDestroy()
   }
