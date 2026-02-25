@@ -24,6 +24,7 @@ This is a simple zazen timer intended for Wear OS, implemented in Flutter.
 
 ```bash
 flutter pub get
+dart run flutter_launcher_icons   # (re)generate app icons
 flutter run
 ```
 
