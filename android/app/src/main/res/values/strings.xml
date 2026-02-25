@@ -4,4 +4,8 @@
     <string name="notification_default_title">Zazen Timer</string>
     <string name="notification_default_text">Session in progress</string>
     <string name="notification_session_progress">%1$s left</string>
+    <string name="notification_session_step_time">%1$s · %2$s left</string>
+    <string name="notification_step_pre_start">Until start</string>
+    <string name="notification_step_zazen">Zazen</string>
+    <string name="notification_step_kinhin">Kinhin</string>
 </resources>
