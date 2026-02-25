@@ -113,8 +113,12 @@ class _PresetListScreenState extends State<PresetListScreen> {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
         title: const Text('Delete preset'),
-        content: Text('Delete "${preset.name}"? This cannot be undone.'),
+        content: SingleChildScrollView(
+          child: Text('Delete "${preset.name}"? This cannot be undone.'),
+        ),
         actions: <Widget>[
           TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
           TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Delete')),
@@ -457,16 +461,52 @@ class _SessionScreenState extends State<SessionScreen> {
     super.dispose();
   }
 
+  Future<void> _onBackPressed() async {
+    final bool? stop = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+        title: const Text('Stop session?'),
+        content: SingleChildScrollView(
+          child: const Text(
+            'Going back will stop the current session. Are you sure?',
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Stop'),
+          ),
+        ],
+      ),
+    );
+    if (stop == true && mounted) {
+      Navigator.of(context).pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: CircularTimer(
-            remaining: _remaining,
-            total: _currentTotal,
-            step: _currentStep,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, dynamic result) async {
+        if (didPop) return;
+        await _onBackPressed();
+      },
+      child: Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: CircularTimer(
+              remaining: _remaining,
+              total: _currentTotal,
+              step: _currentStep,
+            ),
           ),
         ),
       ),
