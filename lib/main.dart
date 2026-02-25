@@ -368,24 +368,52 @@ class _PresetListScreenState extends State<PresetListScreen> {
                   );
                 }
 
-                // Footer: centered button that appears as the last list element
+                // Footer: "New preset" button plus provisional haptic test buttons.
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12.0),
                   child: Center(
-                    child: GestureDetector(
-                      onTap: _createPreset,
-                      child: SizedBox(
-                        height: 44,
-                        child: ElevatedButton.icon(
-                          onPressed: _createPreset,
-                          icon: const Icon(Icons.add),
-                          label: const Text('New preset'),
-                          style: ElevatedButton.styleFrom(
-                            shape: const StadiumBorder(),
-                            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        SizedBox(
+                          height: 44,
+                          child: ElevatedButton.icon(
+                            onPressed: _createPreset,
+                            icon: const Icon(Icons.add),
+                            label: const Text('New preset'),
+                            style: ElevatedButton.styleFrom(
+                              shape: const StadiumBorder(),
+                              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                            ),
                           ),
                         ),
-                      ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: <Widget>[
+                            OutlinedButton(
+                              onPressed: () {
+                                Haptics.threeMedium();
+                              },
+                              child: const Text('3× medium'),
+                            ),
+                            OutlinedButton(
+                              onPressed: () {
+                                Haptics.twoMedium();
+                              },
+                              child: const Text('2× medium'),
+                            ),
+                            OutlinedButton(
+                              onPressed: () {
+                                Haptics.oneLong();
+                              },
+                              child: const Text('1× long'),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 );
