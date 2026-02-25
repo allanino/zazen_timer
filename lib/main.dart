@@ -56,10 +56,10 @@ class _PresetListScreenState extends State<PresetListScreen> {
     if (loaded.isEmpty) {
       // Provide a sensible default based on your description.
       _presets = <SessionPreset>[
-        SessionPreset(
+        const SessionPreset(
           id: 'evening-default',
           name: 'Evening zazen',
-          steps: const <SessionStep>[
+          steps: <SessionStep>[
             SessionStep(type: StepType.preStart, duration: Duration(minutes: 5)),
             SessionStep(type: StepType.zazen, duration: Duration(minutes: 40)),
             SessionStep(type: StepType.kinhin, duration: Duration(minutes: 10)),
@@ -174,7 +174,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
       },
     );
 
-    if (choice == null) return;
+    if (!mounted || choice == null) return;
 
     SessionPreset effective = preset;
 
@@ -189,7 +189,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
               StartTimePickerScreen(initialTime: initial),
         ),
       );
-      if (secondsOfDay == null) return;
+      if (!mounted || secondsOfDay == null) return;
       final int nowSeconds =
           now.hour * 3600 + now.minute * 60 + now.second;
       int diffSeconds = secondsOfDay - nowSeconds;
@@ -258,7 +258,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
               itemBuilder: (BuildContext context, int index) {
                 if (index < _presets.length) {
                   final SessionPreset preset = _presets[index];
-                  final double listHorizontalPadding = 32; // 16 + 16 from ListView padding
+                  const double listHorizontalPadding = 32; // 16 + 16 from ListView padding
                   final double cardWidth = MediaQuery.of(context).size.width - listHorizontalPadding;
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
@@ -278,10 +278,10 @@ class _PresetListScreenState extends State<PresetListScreen> {
                               topLeft: Radius.circular(16),
                               bottomLeft: Radius.circular(16),
                             ),
-                            child: Stack(
+                            child: const Stack(
                               fit: StackFit.expand,
                               alignment: Alignment.center,
-                              children: const <Widget>[
+                              children: <Widget>[
                                 Column(
                                   mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -303,10 +303,10 @@ class _PresetListScreenState extends State<PresetListScreen> {
                               topRight: Radius.circular(16),
                               bottomRight: Radius.circular(16),
                             ),
-                            child: Stack(
+                            child: const Stack(
                               fit: StackFit.expand,
                               alignment: Alignment.center,
-                              children: const <Widget>[
+                              children: <Widget>[
                                 Column(
                                   mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -468,8 +468,8 @@ class _SessionScreenState extends State<SessionScreen> {
         insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
         title: const Text('Stop session?'),
-        content: SingleChildScrollView(
-          child: const Text(
+        content: const SingleChildScrollView(
+          child: Text(
             'Going back will stop the current session. Are you sure?',
           ),
         ),

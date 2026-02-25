@@ -80,9 +80,9 @@ class _MinutePickerScreenState extends State<MinutePickerScreen> {
       body: Column(
         children: <Widget>[
           const SizedBox(height: 8),
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: const <Widget>[
+            children: <Widget>[
               Text('Hr'),
               Text('Min'),
             ],
