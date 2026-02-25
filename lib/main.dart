@@ -149,12 +149,10 @@ class _PresetListScreenState extends State<PresetListScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     const Text('Start now or at a specific time?', textAlign: TextAlign.center),
-                    const SizedBox(height: 12),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
+                    const SizedBox(height: 8),
+                    Row(
                       children: <Widget>[
-                        SizedBox(
-                          width: double.infinity,
+                        Expanded(
                           child: TextButton(
                             onPressed: () => Navigator.of(context).pop(
                               _StartOptions(
@@ -165,9 +163,8 @@ class _PresetListScreenState extends State<PresetListScreen> {
                             child: const Text('Now'),
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          width: double.infinity,
+                        const SizedBox(width: 8),
+                        Expanded(
                           child: TextButton(
                             onPressed: () => Navigator.of(context).pop(
                               _StartOptions(
@@ -180,7 +177,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 8),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
