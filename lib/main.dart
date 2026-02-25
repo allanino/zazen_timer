@@ -1,13 +1,12 @@
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
-import 'foreground_service.dart';
+import 'haptics.dart';
 import 'models.dart';
 import 'preset_edit_screen.dart';
 import 'preset_store.dart';
+import 'session_engine.dart';
 import 'start_time_picker_screen.dart';
 import 'widgets/circular_timer.dart';
 
@@ -50,27 +49,6 @@ class _PresetListScreenState extends State<PresetListScreen> {
   void initState() {
     super.initState();
     _loadPresets();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _checkResumeSession());
-  }
-
-  Future<void> _checkResumeSession() async {
-    final Map<Object?, Object?>? state = await ForegroundService.getState();
-    if (!mounted || state == null) return;
-    try {
-      final String? presetJson = state['preset_json'] as String?;
-      if (presetJson == null) return;
-      final SessionPreset preset = SessionPreset.fromJson(
-        jsonDecode(presetJson) as Map<String, dynamic>,
-      );
-      if (!mounted) return;
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (BuildContext context) => SessionScreen(preset: preset),
-        ),
-      );
-    } catch (_) {
-      // Ignore parse errors
-    }
   }
 
   Future<void> _loadPresets() async {
@@ -242,11 +220,6 @@ class _PresetListScreenState extends State<PresetListScreen> {
       );
     }
 
-    await ForegroundService.startSession(
-      presetJson: jsonEncode(effective.toJson()),
-      title: effective.name,
-    );
-    if (!mounted) return;
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (BuildContext context) => SessionScreen(preset: effective),
@@ -286,7 +259,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
                 if (index < _presets.length) {
                   final SessionPreset preset = _presets[index];
                   final double listHorizontalPadding = 32; // 16 + 16 from ListView padding
-                  final double cardWidth = (MediaQuery.of(context).size.width - listHorizontalPadding).clamp(0.0, double.infinity);
+                  final double cardWidth = MediaQuery.of(context).size.width - listHorizontalPadding;
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: SizedBox(
@@ -436,10 +409,10 @@ class SessionScreen extends StatefulWidget {
 }
 
 class _SessionScreenState extends State<SessionScreen> {
+  late SessionEngine _engine;
   late SessionStep _currentStep;
   late Duration _remaining;
   late Duration _currentTotal;
-  Timer? _pollTimer;
 
   @override
   void initState() {
@@ -447,33 +420,44 @@ class _SessionScreenState extends State<SessionScreen> {
     _currentStep = widget.preset.steps.first;
     _remaining = _currentStep.duration;
     _currentTotal = _currentStep.duration;
-    _pollTimer = Timer.periodic(const Duration(seconds: 1), (_) => _pollState());
-  }
 
-  Future<void> _pollState() async {
-    final Map<Object?, Object?>? state = await ForegroundService.getState();
-    if (!mounted) return;
-    if (state == null) {
-      _pollTimer?.cancel();
-      _pollTimer = null;
-      Navigator.of(context).pop();
-      return;
-    }
-    final int stepIndex = state['step_index'] as int? ?? 0;
-    final int remainingSeconds = state['remaining_seconds'] as int? ?? 0;
-    final int stepDurationSeconds = state['step_duration_seconds'] as int? ?? 0;
-    if (stepIndex < widget.preset.steps.length) {
-      setState(() {
-        _currentStep = widget.preset.steps[stepIndex];
-        _remaining = Duration(seconds: remainingSeconds);
-        _currentTotal = Duration(seconds: stepDurationSeconds);
-      });
-    }
+    _engine = SessionEngine(
+      preset: widget.preset,
+      onTick: (SessionStep step, Duration remaining) {
+        setState(() {
+          _currentStep = step;
+          _remaining = remaining;
+          _currentTotal = step.duration;
+        });
+      },
+      onTransition: (SessionStep? finished, SessionStep? next) {
+        if (finished?.type == StepType.preStart &&
+            next?.type == StepType.zazen) {
+          Haptics.threeMedium();
+        } else if (finished?.type == StepType.zazen &&
+            next?.type == StepType.kinhin) {
+          Haptics.twoMedium();
+        } else if (finished?.type == StepType.kinhin &&
+            next?.type == StepType.zazen) {
+          Haptics.threeMedium();
+        }
+      },
+      onSessionEnd: () {
+        Haptics.oneLong();
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+    );
+
+    WakelockPlus.enable();
+    _engine.start();
   }
 
   @override
   void dispose() {
-    _pollTimer?.cancel();
+    _engine.cancel();
+    WakelockPlus.disable();
     super.dispose();
   }
 
@@ -502,8 +486,7 @@ class _SessionScreenState extends State<SessionScreen> {
       ),
     );
     if (stop == true && mounted) {
-      await ForegroundService.stopSession();
-      if (mounted) Navigator.of(context).pop();
+      Navigator.of(context).pop();
     }
   }
 

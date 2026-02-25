@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="notification_channel_name">Session</string>
-    <string name="notification_default_title">Zazen Timer</string>
-    <string name="notification_default_text">Session in progress</string>
-    <string name="notification_session_progress">%1$s left</string>
-</resources>
