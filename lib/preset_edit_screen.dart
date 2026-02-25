@@ -163,8 +163,6 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
                 children: <Widget>[
                   TextField(
               controller: _nameController,
-              autocorrect: false,
-              enableSuggestions: false,
               focusNode: _nameFocusNode,
               style: const TextStyle(color: Colors.white, fontSize: 18),
               cursorColor: Theme.of(context).colorScheme.primary,
