@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -11,7 +14,23 @@ import 'start_time_picker_screen.dart';
 import 'widgets/circular_timer.dart';
 
 void main() {
-  runApp(const ZazenTimerApp());
+  // Log errors in release so they appear in logcat (e.g. adb logcat) when the app closes.
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    if (kReleaseMode) {
+      debugPrint('FlutterError: ${details.exception}');
+      debugPrint(details.stack?.toString() ?? '');
+    }
+  };
+  runZonedGuarded<Future<void>>(
+    () async {
+      runApp(const ZazenTimerApp());
+    },
+    (Object error, StackTrace stack) {
+      debugPrint('Uncaught error: $error');
+      debugPrint(stack.toString());
+    },
+  );
 }
 
 class ZazenTimerApp extends StatelessWidget {
@@ -52,24 +71,25 @@ class _PresetListScreenState extends State<PresetListScreen> {
   }
 
   Future<void> _loadPresets() async {
-    final List<SessionPreset> loaded = await _store.loadPresets();
-    if (loaded.isEmpty) {
-      // Provide a sensible default based on your description.
-      _presets = <SessionPreset>[
-        const SessionPreset(
-          id: 'evening-default',
-          name: 'Evening zazen',
-          steps: <SessionStep>[
-            SessionStep(type: StepType.preStart, duration: Duration(minutes: 5)),
-            SessionStep(type: StepType.zazen, duration: Duration(minutes: 40)),
-            SessionStep(type: StepType.kinhin, duration: Duration(minutes: 10)),
-            SessionStep(type: StepType.zazen, duration: Duration(minutes: 40)),
-          ],
-        ),
-      ];
-      await _store.savePresets(_presets);
-    } else {
-      _presets = loaded;
+    try {
+      final List<SessionPreset> loaded = await _store.loadPresets();
+      if (loaded.isEmpty) {
+        _presets = _defaultPresets;
+        try {
+          await _store.savePresets(_presets);
+        } catch (_) {
+          // Ignore save failure; we still have in-memory defaults.
+        }
+      } else {
+        _presets = loaded;
+      }
+    } catch (e, stack) {
+      debugPrint('Preset load failed (using defaults): $e');
+      debugPrint(stack.toString());
+      _presets = _defaultPresets;
+      try {
+        await _store.savePresets(_presets);
+      } catch (_) {}
     }
     if (mounted) {
       setState(() {
@@ -77,6 +97,37 @@ class _PresetListScreenState extends State<PresetListScreen> {
       });
     }
   }
+
+  static const List<SessionPreset> _defaultPresets = <SessionPreset>[
+    SessionPreset(
+      id: 'short-default',
+      name: 'Short',
+      steps: <SessionStep>[
+        SessionStep(type: StepType.preStart, duration: Duration(minutes: 1)),
+        SessionStep(type: StepType.zazen, duration: Duration(minutes: 20)),
+        SessionStep(type: StepType.kinhin, duration: Duration(minutes: 10)),
+        SessionStep(type: StepType.zazen, duration: Duration(minutes: 20)),
+      ],
+    ),
+    SessionPreset(
+      id: 'long-default',
+      name: 'Long',
+      steps: <SessionStep>[
+        SessionStep(type: StepType.preStart, duration: Duration(minutes: 1)),
+        SessionStep(type: StepType.zazen, duration: Duration(minutes: 40)),
+        SessionStep(type: StepType.kinhin, duration: Duration(minutes: 10)),
+        SessionStep(type: StepType.zazen, duration: Duration(minutes: 40)),
+      ],
+    ),
+    SessionPreset(
+      id: 'zazen-only-default',
+      name: 'Zazen only',
+      steps: <SessionStep>[
+        SessionStep(type: StepType.preStart, duration: Duration(minutes: 1)),
+        SessionStep(type: StepType.zazen, duration: Duration(minutes: 40)),
+      ],
+    ),
+  ];
 
   Future<void> _createPreset() async {
     final SessionPreset? created =
