@@ -1,6 +1,7 @@
 package com.example.zazen_timer
 
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -11,9 +12,50 @@ import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
   private val channelName = "zazen_timer/haptics"
+  private val foregroundChannelName = "zazen_timer/foreground_service"
 
   override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
     super.configureFlutterEngine(flutterEngine)
+
+    MethodChannel(flutterEngine.dartExecutor.binaryMessenger, foregroundChannelName)
+      .setMethodCallHandler { call, result ->
+        when (call.method) {
+          "start" -> {
+            val presetJson = call.argument<String>("preset_json")
+            val title = call.argument<String>("title") ?: "Zazen Timer"
+            if (!presetJson.isNullOrBlank()) {
+              val intent = Intent(this, SessionForegroundService::class.java).apply {
+                putExtra(SessionForegroundService.EXTRA_PRESET_JSON, presetJson)
+                putExtra(SessionForegroundService.EXTRA_TITLE, title)
+              }
+              if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+              } else {
+                startService(intent)
+              }
+            }
+            result.success(null)
+          }
+          "stop" -> {
+            stopService(Intent(this, SessionForegroundService::class.java))
+            result.success(null)
+          }
+          "getState" -> {
+            val state = SessionForegroundService.currentState
+            if (state == null) {
+              result.success(null)
+            } else {
+              result.success(mapOf(
+                "preset_json" to state.presetJson,
+                "step_index" to state.stepIndex,
+                "remaining_seconds" to state.remainingSeconds,
+                "step_duration_seconds" to state.steps[state.stepIndex].durationSeconds
+              ))
+            }
+          }
+          else -> result.notImplemented()
+        }
+      }
 
     MethodChannel(flutterEngine.dartExecutor.binaryMessenger, channelName)
       .setMethodCallHandler { call, result ->
