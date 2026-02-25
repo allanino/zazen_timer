@@ -75,7 +75,7 @@ class _RingPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     final Paint fgPaint = Paint()
-      ..color = Colors.tealAccent
+      ..color = const Color(0xFFBCBCBC)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
