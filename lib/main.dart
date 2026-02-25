@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'haptics.dart';
@@ -250,81 +251,54 @@ class _PresetListScreenState extends State<PresetListScreen> {
               itemBuilder: (BuildContext context, int index) {
                 if (index < _presets.length) {
                   final SessionPreset preset = _presets[index];
-                  return Dismissible(
+                  return Slidable(
                     key: ValueKey(preset.id),
-                    direction: DismissDirection.endToStart,
-                    confirmDismiss: (DismissDirection direction) async {
-                      if (direction == DismissDirection.endToStart) {
-                        final String? action = await showModalBottomSheet<String>(
-                          context: context,
-                          builder: (BuildContext ctx) {
-                            return SafeArea(
-                              child: Column(
+                    endActionPane: ActionPane(
+                      motion: const ScrollMotion(),
+                      children: <Widget>[
+                        CustomSlidableAction(
+                          onPressed: (BuildContext context) => _editPreset(preset),
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.zero,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            alignment: Alignment.center,
+                            children: const <Widget>[
+                              Column(
                                 mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
-                                  ListTile(
-                                    leading: const Icon(Icons.edit),
-                                    title: const Text('Edit'),
-                                    onTap: () => Navigator.of(ctx).pop('edit'),
-                                  ),
-                                  ListTile(
-                                    leading: const Icon(Icons.delete),
-                                    title: const Text('Delete'),
-                                    onTap: () => Navigator.of(ctx).pop('delete'),
-                                  ),
-                                  ListTile(
-                                    leading: const Icon(Icons.close),
-                                    title: const Text('Cancel'),
-                                    onTap: () => Navigator.of(ctx).pop(null),
-                                  ),
+                                  Icon(Icons.edit),
+                                  SizedBox(height: 4),
+                                  Text('Edit', overflow: TextOverflow.ellipsis),
                                 ],
                               ),
-                            );
-                          },
-                        );
-
-                        if (action == 'delete') {
-                          await _deletePreset(preset);
-                        } else if (action == 'edit') {
-                          await _editPreset(preset);
-                        }
-                      }
-
-                      // Never let Dismissible auto-dismiss; we handle changes manually.
-                      return false;
-                    },
-                    // Background shown when swiping right (startToEnd).
-                    // Provide a transparent background to satisfy the Dismissible
-                    // assertion that both backgrounds cannot be null when
-                    // `secondaryBackground` is used.
-                    background: Container(color: Colors.transparent),
-                    // Background shown when swiping left (endToStart)
-                    secondaryBackground: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      color: Colors.transparent,
-                      alignment: Alignment.centerRight,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            padding: const EdgeInsets.all(8),
-                            margin: const EdgeInsets.only(right: 8),
-                            child: const Icon(Icons.edit, color: Colors.white),
+                            ],
                           ),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            padding: const EdgeInsets.all(8),
-                            child: const Icon(Icons.delete, color: Colors.white),
+                        ),
+                        CustomSlidableAction(
+                          onPressed: (BuildContext context) => _deletePreset(preset),
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.zero,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            alignment: Alignment.center,
+                            children: const <Widget>[
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Icon(Icons.delete),
+                                  SizedBox(height: 4),
+                                  Text('Delete', overflow: TextOverflow.ellipsis),
+                                ],
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                     child: ListTile(
                       title: Text(preset.name),
