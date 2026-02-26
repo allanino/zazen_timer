@@ -9,8 +9,6 @@
   A minimalist Zen meditation timer for Wear OS.
 </p>
 
----
-
 ### Features
 
 - **Configurable session presets** with multiple steps:
