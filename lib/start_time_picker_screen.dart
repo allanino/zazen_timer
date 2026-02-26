@@ -96,11 +96,22 @@ class _StartTimePickerScreenState extends State<StartTimePickerScreen> {
         children: <Widget>[
           const SizedBox(height: 8),
           const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
-              Text('Hour'),
-              Text('Min'),
-              Text('Sec'),
+              Expanded(
+                child: Center(
+                  child: Text('Hour'),
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  child: Text('Min'),
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  child: Text('Sec'),
+                ),
+              ),
             ],
           ),
           Expanded(

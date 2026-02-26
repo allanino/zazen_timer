@@ -81,10 +81,17 @@ class _MinutePickerScreenState extends State<MinutePickerScreen> {
         children: <Widget>[
           const SizedBox(height: 8),
           const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
-              Text('Hr'),
-              Text('Min'),
+              Expanded(
+                child: Center(
+                  child: Text('Hour'),
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  child: Text('Min'),
+                ),
+              ),
             ],
           ),
           Expanded(
