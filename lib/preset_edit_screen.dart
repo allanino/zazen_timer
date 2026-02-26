@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'models.dart';
 import 'minute_picker_screen.dart';
-import 'package:flutter/services.dart';
 
 class PresetEditScreen extends StatefulWidget {
   final SessionPreset? preset;
@@ -14,17 +13,10 @@ class PresetEditScreen extends StatefulWidget {
 }
 
 class _PresetEditScreenState extends State<PresetEditScreen> {
-  final TextEditingController _nameController =
-      TextEditingController(text: 'New preset');
-  final FocusNode _nameFocusNode = FocusNode();
-  String _lastReportedText = '';
   final List<_EditableStep> _steps = <_EditableStep>[];
 
   @override
   void dispose() {
-    _nameController.removeListener(_nameListener);
-    _nameController.dispose();
-    _nameFocusNode.dispose();
     for (final _EditableStep step in _steps) {
       step.minutesController.dispose();
     }
@@ -35,50 +27,32 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
   void initState() {
     super.initState();
     if (widget.preset != null) {
-      _nameController.text = widget.preset!.name;
       for (final SessionStep s in widget.preset!.steps) {
         _steps.add(_EditableStep(type: s.type, minutes: s.duration.inMinutes));
       }
     } else {
-      _nameController.text = 'New preset';
       _steps.addAll(<_EditableStep>[
-        _EditableStep(type: StepType.preStart, minutes: 5),
+        _EditableStep(type: StepType.preStart, minutes: 1),
         _EditableStep(type: StepType.zazen, minutes: 40),
       ]);
     }
-
-    _lastReportedText = _nameController.text;
-    _nameController.addListener(_nameListener);
   }
 
-
-  void _nameListener() {
-    final TextEditingValue v = _nameController.value;
-    // If IME is composing (e.g., using on-screen keyboard composition), avoid
-    // repainting which can interfere with composition. Only rebuild when
-    // composition is not active and the text actually changed.
-    // Push the current editing state to the platform IME to keep the
-    // on-screen/extract editor in sync. Some keyboards (notably on Wear OS)
-    // keep their own copy of the text and don't update properly; forcing an
-    // explicit setEditingState helps synchronize them.
-    try {
-      SystemChannels.textInput.invokeMethod<void>('TextInput.setEditingState', <String, dynamic>{
-        'text': v.text,
-        'selectionBase': v.selection.baseOffset,
-        'selectionExtent': v.selection.extentOffset,
-        'composingBase': v.composing.start,
-        'composingExtent': v.composing.end,
-      });
-    } catch (_) {
-      // ignore platform channel errors
+  List<SessionStep> _buildSessionSteps() {
+    final List<SessionStep> steps = <SessionStep>[];
+    for (final _EditableStep editable in _steps) {
+      final int minutes = editable.minutes;
+      if (minutes <= 0) {
+        continue;
+      }
+      steps.add(
+        SessionStep(
+          type: editable.type,
+          duration: Duration(minutes: minutes),
+        ),
+      );
     }
-
-    final bool isComposing = v.composing.isValid;
-
-    if (!isComposing && v.text != _lastReportedText) {
-      _lastReportedText = v.text;
-      if (mounted) setState(() {});
-    }
+    return steps;
   }
 
   void _addStep() {
@@ -96,25 +70,7 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
   }
 
   Future<void> _save() async {
-    final String name = _nameController.text.trim();
-    if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please give the preset a name.')),
-      );
-      return;
-    }
-
-    final List<SessionStep> steps = <SessionStep>[];
-    for (final _EditableStep editable in _steps) {
-      final int minutes = editable.minutes;
-      if (minutes <= 0) continue;
-      steps.add(
-        SessionStep(
-          type: editable.type,
-          duration: Duration(minutes: minutes),
-        ),
-      );
-    }
+    final List<SessionStep> steps = _buildSessionSteps();
 
     if (steps.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -122,6 +78,8 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
       );
       return;
     }
+
+    final String name = buildPresetNameFromSteps(steps);
 
     final SessionPreset preset = SessionPreset(
       id: widget.preset?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
@@ -151,20 +109,6 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.only(bottom: 12),
                 children: <Widget>[
-                  TextField(
-              controller: _nameController,
-              focusNode: _nameFocusNode,
-              style: const TextStyle(color: Colors.white, fontSize: 18),
-              cursorColor: Theme.of(context).colorScheme.primary,
-              keyboardType: TextInputType.text,
-              textInputAction: TextInputAction.done,
-              maxLines: 1,
-              decoration: const InputDecoration(
-                labelText: 'Preset name',
-                floatingLabelBehavior: FloatingLabelBehavior.auto,
-              ),
-            ),
-            const SizedBox(height: 8),
             ..._steps.asMap().entries.map((MapEntry<int, _EditableStep> entry) {
               final int index = entry.key;
               final _EditableStep step = entry.value;

@@ -141,24 +141,6 @@ class _PresetListScreenState extends State<PresetListScreen> {
         SessionStep(type: StepType.zazen, duration: Duration(minutes: 20)),
       ],
     ),
-    SessionPreset(
-      id: 'long-default',
-      name: 'Long',
-      steps: <SessionStep>[
-        SessionStep(type: StepType.preStart, duration: Duration(minutes: 1)),
-        SessionStep(type: StepType.zazen, duration: Duration(minutes: 40)),
-        SessionStep(type: StepType.kinhin, duration: Duration(minutes: 10)),
-        SessionStep(type: StepType.zazen, duration: Duration(minutes: 40)),
-      ],
-    ),
-    SessionPreset(
-      id: 'zazen-only-default',
-      name: 'Zazen only',
-      steps: <SessionStep>[
-        SessionStep(type: StepType.preStart, duration: Duration(minutes: 1)),
-        SessionStep(type: StepType.zazen, duration: Duration(minutes: 40)),
-      ],
-    ),
   ];
 
   Future<void> _createPreset() async {
@@ -200,7 +182,9 @@ class _PresetListScreenState extends State<PresetListScreen> {
         contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
         title: const Text('Delete preset'),
         content: SingleChildScrollView(
-          child: Text('Delete "${preset.name}"? This cannot be undone.'),
+          child: Text(
+            'Delete "${preset.breakdownLabel}"? This cannot be undone.',
+          ),
         ),
         actions: <Widget>[
           TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
@@ -592,7 +576,7 @@ class _PresetListItemState extends State<_PresetListItem> {
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
                             Text(
-                              widget.preset.name,
+                              widget.preset.breakdownLabel,
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -601,7 +585,7 @@ class _PresetListItemState extends State<_PresetListItem> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Total: ${widget.preset.totalDuration.inMinutes} min',
+                              widget.preset.totalLabel,
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.grey.shade400,

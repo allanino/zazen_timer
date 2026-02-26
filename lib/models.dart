@@ -34,6 +34,19 @@ class SessionStep {
       );
 }
 
+List<SessionStep> _displayStepsFor(List<SessionStep> steps) {
+  final List<SessionStep> meditationOnly = steps
+      .where(
+        (SessionStep s) =>
+            s.type == StepType.zazen || s.type == StepType.kinhin,
+      )
+      .toList();
+  if (meditationOnly.isNotEmpty) {
+    return meditationOnly;
+  }
+  return steps;
+}
+
 class SessionPreset {
   final String id;
   final String name;
@@ -45,10 +58,30 @@ class SessionPreset {
     required this.steps,
   });
 
+  List<SessionStep> get displaySteps => _displayStepsFor(steps);
+
   Duration get totalDuration => steps.fold<Duration>(
         Duration.zero,
         (Duration sum, SessionStep step) => sum + step.duration,
       );
+
+  int get displayMinutesTotal => displaySteps.fold<int>(
+        0,
+        (int sum, SessionStep step) => sum + step.duration.inMinutes,
+      );
+
+  String get breakdownLabel {
+    if (displaySteps.isEmpty) {
+      return '';
+    }
+    return displaySteps
+        .map<String>(
+          (SessionStep step) => step.duration.inMinutes.toString(),
+        )
+        .join(' + ');
+  }
+
+  String get totalLabel => '$displayMinutesTotal min total';
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'id': id,
@@ -67,4 +100,24 @@ class SessionPreset {
             .toList(),
       );
 }
+
+String buildPresetNameFromSteps(List<SessionStep> steps) {
+  final List<SessionStep> effectiveSteps = _displayStepsFor(steps);
+  if (effectiveSteps.isEmpty) {
+    return 'Session';
+  }
+
+  final String breakdown = effectiveSteps
+      .map<String>(
+        (SessionStep step) => step.duration.inMinutes.toString(),
+      )
+      .join(' + ');
+  final int totalMinutes = effectiveSteps.fold<int>(
+    0,
+    (int sum, SessionStep step) => sum + step.duration.inMinutes,
+  );
+
+  return '$breakdown ($totalMinutes min total)';
+}
+
 
