@@ -369,14 +369,19 @@ class _PresetListScreenState extends State<PresetListScreen> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.fromLTRB(
                   16,
-                  8,
+                  24,
                   16,
                   MediaQuery.of(context).padding.bottom + 12.0,
                 ),
-                itemCount: _presets.length + 1,
+                itemCount: _presets.length + 1 + (_presets.length <= 2 ? 1 : 0),
                 itemBuilder: (BuildContext context, int index) {
-                  if (index < _presets.length) {
-                    final SessionPreset preset = _presets[index];
+                  final bool hasLeadingSpacer = _presets.length <= 2;
+                  if (hasLeadingSpacer && index == 0) {
+                    return const SizedBox(height: 24);
+                  }
+                  final int presetIndex = hasLeadingSpacer ? index - 1 : index;
+                  if (presetIndex < _presets.length) {
+                    final SessionPreset preset = _presets[presetIndex];
                     const double listHorizontalPadding = 32; // 16 + 16 from ListView padding
                     final double cardWidth =
                         MediaQuery.of(context).size.width - listHorizontalPadding;
