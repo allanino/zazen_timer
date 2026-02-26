@@ -6,9 +6,10 @@
 <h1 align="center">Zazen Timer (Wear OS / Flutter)</h1>
 
 <p align="center">
-  A minimalist meditation timer for Wear OS.
+  A minimalist Zen meditation timer for Wear OS.
 </p>
 
+---
 
 ### Features
 
