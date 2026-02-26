@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'app_colors.dart';
@@ -92,9 +93,12 @@ class PresetListScreen extends StatefulWidget {
 }
 
 class _PresetListScreenState extends State<PresetListScreen> {
+  static const String _keyHasStartedSession = 'has_started_first_session';
+
   final PresetStore _store = PresetStore();
   List<SessionPreset> _presets = <SessionPreset>[];
   bool _loading = true;
+  bool _hasStartedSession = false;
 
   @override
   void initState() {
@@ -123,11 +127,25 @@ class _PresetListScreenState extends State<PresetListScreen> {
         await _store.savePresets(_presets);
       } catch (_) {}
     }
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      _hasStartedSession = prefs.getBool(_keyHasStartedSession) ?? false;
+    } catch (_) {}
     if (mounted) {
       setState(() {
         _loading = false;
       });
     }
+  }
+
+  Future<void> _markSessionStarted() async {
+    if (_hasStartedSession) return;
+    _hasStartedSession = true;
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_keyHasStartedSession, true);
+    } catch (_) {}
+    if (mounted) setState(() {});
   }
 
   static const List<SessionPreset> _defaultPresets = <SessionPreset>[
@@ -339,6 +357,8 @@ class _PresetListScreenState extends State<PresetListScreen> {
       );
     }
 
+    await _markSessionStarted();
+    if (!mounted) return;
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (BuildContext context) => SessionScreen(
@@ -385,18 +405,37 @@ class _PresetListScreenState extends State<PresetListScreen> {
                     const double listHorizontalPadding = 32; // 16 + 16 from ListView padding
                     final double cardWidth =
                         MediaQuery.of(context).size.width - listHorizontalPadding;
+                    final Widget card = SizedBox(
+                      width: cardWidth,
+                      child: _PresetListItem(
+                        key: ValueKey<String>(preset.id),
+                        preset: preset,
+                        onStart: () => _startPreset(preset),
+                        onEdit: () => _editPreset(preset),
+                        onDelete: () => _deletePreset(preset),
+                      ),
+                    );
+                    final bool showTapHint =
+                        presetIndex == 0 && !(_hasStartedSession ?? false);
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: SizedBox(
-                        width: cardWidth,
-                        child: _PresetListItem(
-                          key: ValueKey<String>(preset.id),
-                          preset: preset,
-                          onStart: () => _startPreset(preset),
-                          onEdit: () => _editPreset(preset),
-                          onDelete: () => _deletePreset(preset),
-                        ),
-                      ),
+                      child: showTapHint
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Text(
+                                  'Tap card to start session',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey.shade500,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                card,
+                              ],
+                            )
+                          : card,
                     );
                   }
 
