@@ -1,6 +1,14 @@
-## Zazen Timer (Wear OS / Flutter)
 
-This is a simple zazen timer intended for Wear OS, implemented in Flutter.
+<p align="center">
+  <img src="assets/images/logo_v2.png" width="120" />
+</p>
+
+<h1 align="center">Zazen Timer (Wear OS / Flutter)</h1>
+
+<p align="center">
+  A minimalist meditation timer for Wear OS.
+</p>
+
 
 ### Features
 
