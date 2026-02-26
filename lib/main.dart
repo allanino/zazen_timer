@@ -94,11 +94,13 @@ class PresetListScreen extends StatefulWidget {
 
 class _PresetListScreenState extends State<PresetListScreen> {
   static const String _keyHasStartedSession = 'has_started_first_session';
+  static const String _keyScreenOff = 'screen_off';
 
   final PresetStore _store = PresetStore();
   List<SessionPreset> _presets = <SessionPreset>[];
   bool _loading = true;
   bool _hasStartedSession = false;
+  bool _screenOff = false;
 
   @override
   void initState() {
@@ -130,12 +132,23 @@ class _PresetListScreenState extends State<PresetListScreen> {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       _hasStartedSession = prefs.getBool(_keyHasStartedSession) ?? false;
+      _screenOff = prefs.getBool(_keyScreenOff) ?? false;
     } catch (_) {}
     if (mounted) {
       setState(() {
         _loading = false;
       });
     }
+  }
+
+  Future<void> _setScreenOff(bool value) async {
+    setState(() {
+      _screenOff = value;
+    });
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_keyScreenOff, value);
+    } catch (_) {}
   }
 
   Future<void> _markSessionStarted() async {
@@ -223,64 +236,43 @@ class _PresetListScreenState extends State<PresetListScreen> {
     final _StartOptions? options = await showDialog<_StartOptions>(
       context: context,
       builder: (BuildContext context) {
-        bool noDisplay = false;
-        return StatefulBuilder(
-          builder: (BuildContext context, void Function(void Function()) setState) {
-            return AlertDialog(
-              insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+        return AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                const Text('Start now or at a specific time?', textAlign: TextAlign.center),
+                const SizedBox(height: 8),
+                Row(
                   children: <Widget>[
-                    const Text('Start now or at a specific time?', textAlign: TextAlign.center),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: TextButton(
-                            onPressed: () => Navigator.of(context).pop(
-                              _StartOptions(
-                                choice: 'now',
-                                noDisplay: noDisplay,
-                              ),
-                            ),
-                            child: const Text('Now'),
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.of(context).pop(
+                          _StartOptions(
+                            choice: 'now',
+                            noDisplay: _screenOff,
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(
-                            _StartOptions(
-                              choice: 'time',
-                              noDisplay: noDisplay,
-                            ),
-                          ),
-                          child: const Text('Schedule', softWrap: false),
-                        ),
-                      ],
+                        child: const Text('Now'),
+                      ),
                     ),
-                    const SizedBox(height: 8),
-                    const Text('Black screen? (Vibrations only)', textAlign: TextAlign.center),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Switch(
-                          value: noDisplay,
-                          onChanged: (bool value) {
-                            setState(() {
-                              noDisplay = value;
-                            });
-                          },
+                    const SizedBox(width: 8),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(
+                        _StartOptions(
+                          choice: 'time',
+                          noDisplay: _screenOff,
                         ),
-                      ],
+                      ),
+                      child: const Text('Schedule', softWrap: false),
                     ),
                   ],
                 ),
-              ),
-            );
-          },
+              ],
+            ),
+          ),
         );
       },
     );
@@ -288,7 +280,6 @@ class _PresetListScreenState extends State<PresetListScreen> {
     if (!mounted || options == null) return;
 
     final String choice = options.choice;
-    final bool noDisplay = options.noDisplay;
 
     SessionPreset effective = preset;
 
@@ -340,7 +331,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
       MaterialPageRoute<void>(
         builder: (BuildContext context) => SessionScreen(
           preset: effective,
-          noDisplay: noDisplay,
+          noDisplay: _screenOff,
         ),
       ),
     );
@@ -370,13 +361,49 @@ class _PresetListScreenState extends State<PresetListScreen> {
                   16,
                   MediaQuery.of(context).padding.bottom + 12.0,
                 ),
-                itemCount: _presets.length + 1 + (_presets.length <= 2 ? 1 : 0),
+                itemCount: 1 + _presets.length + 1 + (_presets.length <= 2 ? 1 : 0),
                 itemBuilder: (BuildContext context, int index) {
-                  final bool hasLeadingSpacer = _presets.length <= 2;
-                  if (hasLeadingSpacer && index == 0) {
-                    return const SizedBox(height: 24);
+                  if (index == 0) {
+                    final bool showDarkSessionHint = !_hasStartedSession;
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 12, bottom: 6),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          if (showDarkSessionHint) ...[
+                            Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Text(
+                                'Dark session keeps the screen off during practice, using vibrations only.',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade500,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                          ],
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              const Text('Dark session'),
+                              Switch(
+                                value: _screenOff,
+                                onChanged: (bool value) => _setScreenOff(value),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
                   }
-                  final int presetIndex = hasLeadingSpacer ? index - 1 : index;
+                  final int contentIndex = index - 1;
+                  final bool hasLeadingSpacer = _presets.length <= 2;
+                  if (hasLeadingSpacer && contentIndex == 0) {
+                    return const SizedBox(height: 8);
+                  }
+                  final int presetIndex = hasLeadingSpacer ? contentIndex - 1 : contentIndex;
                   if (presetIndex < _presets.length) {
                     final SessionPreset preset = _presets[presetIndex];
                     const double listHorizontalPadding = 32; // 16 + 16 from ListView padding
@@ -392,7 +419,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
                       ),
                     );
                     final bool showTapHint =
-                        presetIndex == 0 && !(_hasStartedSession ?? false);
+                        presetIndex == 0 && !_hasStartedSession;
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: showTapHint
