@@ -249,42 +249,19 @@ class _PresetListScreenState extends State<PresetListScreen> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Expanded(
-                          child: TextButton(
-                            onPressed: () => Navigator.of(context).pop(
-                              _StartOptions(
-                                choice: 'time',
-                                noDisplay: noDisplay,
-                              ),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(
+                            _StartOptions(
+                              choice: 'time',
+                              noDisplay: noDisplay,
                             ),
-                            child: const Text('Pick time'),
                           ),
+                          child: const Text('Schedule', softWrap: false),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const <Widget>[
-                              Text(
-                                'No display',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Keep the screen black while the session runs, using vibrations only.',
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                    const Text('Black screen? (Vibrations only)', textAlign: TextAlign.center),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -403,8 +380,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
                   if (presetIndex < _presets.length) {
                     final SessionPreset preset = _presets[presetIndex];
                     const double listHorizontalPadding = 32; // 16 + 16 from ListView padding
-                    final double cardWidth =
-                        MediaQuery.of(context).size.width - listHorizontalPadding;
+                    final double cardWidth = (MediaQuery.sizeOf(context).width - listHorizontalPadding).clamp(0.0, double.infinity);
                     final Widget card = SizedBox(
                       width: cardWidth,
                       child: _PresetListItem(
