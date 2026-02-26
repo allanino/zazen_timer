@@ -67,7 +67,7 @@ class _RingPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     const double strokeWidth = 12.0;
     const double radiusPadding = 8.0;
-    const Color baseColor = Color.fromARGB(255, 99, 104, 108);
+    const Color baseColor = Color.fromARGB(255, 85, 89, 92);
     const Color brighterColor = Color(0xFF989DA3);
 
 
@@ -98,7 +98,7 @@ class _RingPainter extends CustomPainter {
 
     // Blend the bright core towards baseColor as the arc shrinks,
     // so the gradient fades out naturally instead of switching abruptly.
-    final double t = clampedFraction.clamp(0.0, 1.0);
+    final double t = math.pow(clampedFraction.clamp(0.0, 1.0), 0.75).toDouble();
     final Color coreColor = Color.lerp(baseColor, brighterColor.withOpacity(0.95), t)!;
     final Color trailColor = Color.lerp(baseColor, baseColor.withOpacity(0.1), t)!;
 
