@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'haptics.dart';
@@ -368,105 +367,12 @@ class _PresetListScreenState extends State<PresetListScreen> {
                       padding: const EdgeInsets.only(bottom: 12),
                       child: SizedBox(
                         width: cardWidth,
-                        child: Slidable(
-                          key: ValueKey(preset.id),
-                          endActionPane: ActionPane(
-                            motion: const ScrollMotion(),
-                            children: <Widget>[
-                              CustomSlidableAction(
-                                onPressed: (BuildContext context) => _editPreset(preset),
-                                backgroundColor: Colors.blue,
-                                foregroundColor: Colors.white,
-                                padding: EdgeInsets.zero,
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(16),
-                                  bottomLeft: Radius.circular(16),
-                                ),
-                                child: const Stack(
-                                  fit: StackFit.expand,
-                                  alignment: Alignment.center,
-                                  children: <Widget>[
-                                    Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        Icon(Icons.edit),
-                                        SizedBox(height: 4),
-                                        Text('Edit', overflow: TextOverflow.ellipsis),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              CustomSlidableAction(
-                                onPressed: (BuildContext context) => _deletePreset(preset),
-                                backgroundColor: Colors.red,
-                                foregroundColor: Colors.white,
-                                padding: EdgeInsets.zero,
-                                borderRadius: const BorderRadius.only(
-                                  topRight: Radius.circular(16),
-                                  bottomRight: Radius.circular(16),
-                                ),
-                                child: const Stack(
-                                  fit: StackFit.expand,
-                                  alignment: Alignment.center,
-                                  children: <Widget>[
-                                    Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        Icon(Icons.delete),
-                                        SizedBox(height: 4),
-                                        Text('Delete', overflow: TextOverflow.ellipsis),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          child: Material(
-                            color: const Color(0xFF262B32),
-                            borderRadius: BorderRadius.circular(16),
-                            child: InkWell(
-                              onTap: () => _startPreset(preset),
-                              borderRadius: BorderRadius.circular(16),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 14,
-                                ),
-                                child: Row(
-                                  children: <Widget>[
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: <Widget>[
-                                          Text(
-                                            preset.name,
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              color: Color(0xFFEEEEEE),
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            'Total: ${preset.totalDuration.inMinutes} min',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.grey.shade400,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
+                        child: _PresetListItem(
+                          key: ValueKey<String>(preset.id),
+                          preset: preset,
+                          onStart: () => _startPreset(preset),
+                          onEdit: () => _editPreset(preset),
+                          onDelete: () => _deletePreset(preset),
                         ),
                       ),
                     );
@@ -497,6 +403,226 @@ class _PresetListScreenState extends State<PresetListScreen> {
         ),
       ),
       // FAB removed — button is rendered inline as the last list element
+    );
+  }
+}
+
+class _PresetListItem extends StatefulWidget {
+  final SessionPreset preset;
+  final VoidCallback onStart;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  const _PresetListItem({
+    super.key,
+    required this.preset,
+    required this.onStart,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  @override
+  State<_PresetListItem> createState() => _PresetListItemState();
+}
+
+class _PresetListItemState extends State<_PresetListItem> {
+  static const double _actionWidth = 160;
+  static const double _gap = 6;
+  static const double _maxReveal = _actionWidth + _gap;
+  double _dragOffset = 0;
+
+  void _handleHorizontalDragUpdate(DragUpdateDetails details) {
+    setState(() {
+      _dragOffset += details.delta.dx;
+      if (_dragOffset > 0) {
+        _dragOffset = 0;
+      } else if (_dragOffset < -_maxReveal) {
+        _dragOffset = -_maxReveal;
+      }
+    });
+  }
+
+  void _handleHorizontalDragEnd(DragEndDetails details) {
+    final double threshold = _maxReveal * 0.5;
+    setState(() {
+      if (_dragOffset.abs() < threshold) {
+        _dragOffset = 0;
+      } else {
+        _dragOffset = -_maxReveal;
+      }
+    });
+  }
+
+  void _handleTap() {
+    if (_dragOffset != 0) {
+      setState(() {
+        _dragOffset = 0;
+      });
+    } else {
+      widget.onStart();
+    }
+  }
+    void _handleEditTap() {
+    setState(() {
+      _dragOffset = 0;
+    });
+    widget.onEdit();
+  }
+
+  void _handleDeleteTap() {
+    setState(() {
+      _dragOffset = 0;
+    });
+    widget.onDelete();
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onHorizontalDragUpdate: _handleHorizontalDragUpdate,
+      onHorizontalDragEnd: _handleHorizontalDragEnd,
+      onTap: _handleTap,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.centerRight,
+        children: <Widget>[
+          Positioned(
+            top: 0,
+            bottom: 0,
+            right: 0,
+            width: _actionWidth,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Expanded(
+                  child: _ActionButton(
+                    color: const Color(0xFF4C7A96),
+                    icon: Icons.edit,
+                    label: 'Edit',
+                    onTap: _handleEditTap,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      bottomLeft: Radius.circular(16),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: _ActionButton(
+                    color: const Color(0xFFB05A5A),
+                    icon: Icons.delete,
+                    label: 'Delete',
+                    onTap: _handleDeleteTap,
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(16),
+                      bottomRight: Radius.circular(16),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            curve: Curves.easeOut,
+            transform: Matrix4.translationValues(_dragOffset, 0, 0),
+            decoration: BoxDecoration(
+              color: const Color(0xFF262B32),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: _dragOffset == 0
+                  ? const <BoxShadow>[]
+                  : <BoxShadow>[
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.6),
+                        blurRadius: 12,
+                        spreadRadius: 2,
+                      ),
+                    ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(16),
+              child: InkWell(
+                onTap: _handleTap,
+                borderRadius: BorderRadius.circular(16),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Text(
+                              widget.preset.name,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFFEEEEEE),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Total: ${widget.preset.totalDuration.inMinutes} min',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade400,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  final Color color;
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final BorderRadius borderRadius;
+
+  const _ActionButton({
+    required this.color,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    required this.borderRadius,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: color,
+      borderRadius: borderRadius,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: borderRadius,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(icon),
+              const SizedBox(height: 4),
+              Text(label, overflow: TextOverflow.ellipsis),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
