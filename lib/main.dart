@@ -344,158 +344,157 @@ class _PresetListScreenState extends State<PresetListScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Presets'),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: <Widget>[
-          const SizedBox(height: 8),
-          Expanded(
-            child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.fromLTRB(
-                16,
-                8,
-                16,
-                MediaQuery.of(context).padding.bottom + 12.0,
-              ),
-              itemCount: _presets.length + 1,
-              itemBuilder: (BuildContext context, int index) {
-                if (index < _presets.length) {
-                  final SessionPreset preset = _presets[index];
-                  const double listHorizontalPadding = 32; // 16 + 16 from ListView padding
-                  final double cardWidth = MediaQuery.of(context).size.width - listHorizontalPadding;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: SizedBox(
-                      width: cardWidth,
-                      child: Slidable(
-                            key: ValueKey(preset.id),
-                            endActionPane: ActionPane(
-                        motion: const ScrollMotion(),
-                        children: <Widget>[
-                          CustomSlidableAction(
-                            onPressed: (BuildContext context) => _editPreset(preset),
-                            backgroundColor: Colors.blue,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.zero,
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(16),
-                              bottomLeft: Radius.circular(16),
-                            ),
-                            child: const Stack(
-                              fit: StackFit.expand,
-                              alignment: Alignment.center,
-                              children: <Widget>[
-                                Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
+      body: SafeArea(
+        child: Column(
+          children: <Widget>[
+            const SizedBox(height: 8),
+            Expanded(
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  8,
+                  16,
+                  MediaQuery.of(context).padding.bottom + 12.0,
+                ),
+                itemCount: _presets.length + 1,
+                itemBuilder: (BuildContext context, int index) {
+                  if (index < _presets.length) {
+                    final SessionPreset preset = _presets[index];
+                    const double listHorizontalPadding = 32; // 16 + 16 from ListView padding
+                    final double cardWidth =
+                        MediaQuery.of(context).size.width - listHorizontalPadding;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: SizedBox(
+                        width: cardWidth,
+                        child: Slidable(
+                          key: ValueKey(preset.id),
+                          endActionPane: ActionPane(
+                            motion: const ScrollMotion(),
+                            children: <Widget>[
+                              CustomSlidableAction(
+                                onPressed: (BuildContext context) => _editPreset(preset),
+                                backgroundColor: Colors.blue,
+                                foregroundColor: Colors.white,
+                                padding: EdgeInsets.zero,
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(16),
+                                  bottomLeft: Radius.circular(16),
+                                ),
+                                child: const Stack(
+                                  fit: StackFit.expand,
+                                  alignment: Alignment.center,
                                   children: <Widget>[
-                                    Icon(Icons.edit),
-                                    SizedBox(height: 4),
-                                    Text('Edit', overflow: TextOverflow.ellipsis),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          CustomSlidableAction(
-                            onPressed: (BuildContext context) => _deletePreset(preset),
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.zero,
-                            borderRadius: const BorderRadius.only(
-                              topRight: Radius.circular(16),
-                              bottomRight: Radius.circular(16),
-                            ),
-                            child: const Stack(
-                              fit: StackFit.expand,
-                              alignment: Alignment.center,
-                              children: <Widget>[
-                                Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Icon(Icons.delete),
-                                    SizedBox(height: 4),
-                                    Text('Delete', overflow: TextOverflow.ellipsis),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      child: Material(
-                        color: const Color(0xFF262B32),
-                        borderRadius: BorderRadius.circular(16),
-                        child: InkWell(
-                          onTap: () => _startPreset(preset),
-                          borderRadius: BorderRadius.circular(16),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 14,
-                            ),
-                            child: Row(
-                              children: <Widget>[
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                Text(
-                                  preset.name,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFFEEEEEE),
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Total: ${preset.totalDuration.inMinutes} min',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey.shade400,
-                                  ),
-                                ),
-                              ],
+                                    Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        Icon(Icons.edit),
+                                        SizedBox(height: 4),
+                                        Text('Edit', overflow: TextOverflow.ellipsis),
+                                      ],
                                     ),
-                                  ),
-                              ],
+                                  ],
+                                ),
+                              ),
+                              CustomSlidableAction(
+                                onPressed: (BuildContext context) => _deletePreset(preset),
+                                backgroundColor: Colors.red,
+                                foregroundColor: Colors.white,
+                                padding: EdgeInsets.zero,
+                                borderRadius: const BorderRadius.only(
+                                  topRight: Radius.circular(16),
+                                  bottomRight: Radius.circular(16),
+                                ),
+                                child: const Stack(
+                                  fit: StackFit.expand,
+                                  alignment: Alignment.center,
+                                  children: <Widget>[
+                                    Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        Icon(Icons.delete),
+                                        SizedBox(height: 4),
+                                        Text('Delete', overflow: TextOverflow.ellipsis),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          child: Material(
+                            color: const Color(0xFF262B32),
+                            borderRadius: BorderRadius.circular(16),
+                            child: InkWell(
+                              onTap: () => _startPreset(preset),
+                              borderRadius: BorderRadius.circular(16),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 14,
+                                ),
+                                child: Row(
+                                  children: <Widget>[
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: <Widget>[
+                                          Text(
+                                            preset.name,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: Color(0xFFEEEEEE),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            'Total: ${preset.totalDuration.inMinutes} min',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.grey.shade400,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
+                    );
+                  }
+
+                  // Footer: centered button that appears as the last list element
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12.0),
+                    child: Center(
+                      child: SizedBox(
+                        height: 44,
+                        child: ElevatedButton.icon(
+                          onPressed: _createPreset,
+                          icon: const Icon(Icons.add),
+                          label: const Text('New preset'),
+                          style: ElevatedButton.styleFrom(
+                            shape: const StadiumBorder(),
+                            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                          ),
+                        ),
+                      ),
                     ),
                   );
-                }
-
-                // Footer: centered button that appears as the last list element
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12.0),
-                  child: Center(
-                    child: SizedBox(
-                      height: 44,
-                      child: ElevatedButton.icon(
-                        onPressed: _createPreset,
-                        icon: const Icon(Icons.add),
-                        label: const Text('New preset'),
-                        style: ElevatedButton.styleFrom(
-                          shape: const StadiumBorder(),
-                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       // FAB removed — button is rendered inline as the last list element
     );

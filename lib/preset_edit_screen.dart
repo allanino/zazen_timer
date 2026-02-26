@@ -136,16 +136,6 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.preset != null ? 'Edit preset' : 'New preset'),
-        centerTitle: true,
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: _save,
-          ),
-        ],
-      ),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
