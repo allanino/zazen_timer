@@ -443,28 +443,45 @@ class _PresetListItem extends StatefulWidget {
 }
 
 class _PresetListItemState extends State<_PresetListItem> {
-  static const double _actionWidth = 160;
+  static const double _actionWidth = 112;
   static const double _gap = 6;
   static const double _maxReveal = _actionWidth + _gap;
   double _dragOffset = 0;
+  double _dragStartOffset = 0;
+
+  void _handleHorizontalDragStart(DragStartDetails details) {
+    _dragStartOffset = _dragOffset;
+  }
 
   void _handleHorizontalDragUpdate(DragUpdateDetails details) {
     setState(() {
-      _dragOffset += details.delta.dx;
-      if (_dragOffset > 0) {
-        _dragOffset = 0;
-      } else if (_dragOffset < -_maxReveal) {
-        _dragOffset = -_maxReveal;
-      }
+      _dragOffset = (_dragOffset + details.delta.dx)
+          .clamp(-_maxReveal, 0.0);
     });
   }
 
   void _handleHorizontalDragEnd(DragEndDetails details) {
-    final double threshold = _maxReveal * 0.5;
+    final double velocity = details.velocity.pixelsPerSecond.dx;
+    const double flingVelocity = 250; // Logical px/s threshold for a fling
+    const double fractionThreshold = 0.5; // 50% of reveal for snap decision
+
     setState(() {
-      if (_dragOffset.abs() < threshold) {
+      if (velocity > flingVelocity) {
+        // Fast swipe to the right → close.
+        _dragOffset = 0;
+      } else if (velocity < -flingVelocity) {
+        // Fast swipe to the left → fully open.
+        _dragOffset = -_maxReveal;
+      } else if (_dragStartOffset <= -_maxReveal + 0.01 &&
+          _dragOffset > _dragStartOffset) {
+        // Drag started from fully open and moved right at least a bit → close,
+        // even if it didn't cross the distance threshold.
+        _dragOffset = 0;
+      } else if (_dragOffset.abs() < _maxReveal * fractionThreshold) {
+        // Closer to closed → snap closed.
         _dragOffset = 0;
       } else {
+        // Closer to open → snap fully open.
         _dragOffset = -_maxReveal;
       }
     });
@@ -498,6 +515,7 @@ class _PresetListItemState extends State<_PresetListItem> {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
+      onHorizontalDragStart: _handleHorizontalDragStart,
       onHorizontalDragUpdate: _handleHorizontalDragUpdate,
       onHorizontalDragEnd: _handleHorizontalDragEnd,
       onTap: _handleTap,
@@ -514,28 +532,34 @@ class _PresetListItemState extends State<_PresetListItem> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 Expanded(
-                  child: _ActionButton(
-                    color: const Color(0xFF4C7A96),
-                    icon: Icons.edit,
-                    label: 'Edit',
-                    onTap: _handleEditTap,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      bottomLeft: Radius.circular(16),
+                  child: Semantics(
+                    button: true,
+                    label: 'Edit preset',
+                    child: _ActionButton(
+                      color: const Color(0xFF4C7A96),
+                      icon: Icons.edit,
+                      onTap: _handleEditTap,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        bottomLeft: Radius.circular(16),
+                      ),
                     ),
-                  ),
+                  )
                 ),
                 Expanded(
-                  child: _ActionButton(
-                    color: const Color(0xFFB05A5A),
-                    icon: Icons.delete,
-                    label: 'Delete',
-                    onTap: _handleDeleteTap,
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(16),
-                      bottomRight: Radius.circular(16),
+                  child: Semantics(
+                    button: true,
+                    label: 'Delete preset',
+                    child: _ActionButton(
+                      color: const Color(0xFFB05A5A),
+                      icon: Icons.delete,
+                      onTap: _handleDeleteTap,
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(16),
+                        bottomRight: Radius.circular(16),
+                      ),
                     ),
-                  ),
+                  )
                 ),
               ],
             ),
@@ -609,14 +633,12 @@ class _PresetListItemState extends State<_PresetListItem> {
 class _ActionButton extends StatelessWidget {
   final Color color;
   final IconData icon;
-  final String label;
   final VoidCallback onTap;
   final BorderRadius borderRadius;
 
   const _ActionButton({
     required this.color,
     required this.icon,
-    required this.label,
     required this.onTap,
     required this.borderRadius,
   });
@@ -630,14 +652,7 @@ class _ActionButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: borderRadius,
         child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Icon(icon),
-              const SizedBox(height: 4),
-              Text(label, overflow: TextOverflow.ellipsis),
-            ],
-          ),
+          child: Icon(icon, size: 22),
         ),
       ),
     );
