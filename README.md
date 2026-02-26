@@ -9,7 +9,16 @@
   A minimalist Zen meditation timer for Wear OS.
 </p>
 
-### Features
+## Screenshots
+
+<p align="center">
+  <img src="docs/images/screen1.png" width="220"/>
+  <img src="docs/images/screen2.png" width="220"/>
+  <img src="docs/images/screen3.png" width="220"/>
+  <img src="docs/images/screen4.png" width="220"/>
+</p>
+
+## Features
 
 - **Configurable session presets** with multiple steps:
   - Pre-start (time before zazen actually begins)
@@ -24,7 +33,7 @@
   - Large, centered remaining time
   - Progress ring around the watch face
 
-### Running
+## Running
 
 1. Ensure you have Flutter installed and configured for Wear OS / Android.
 2. From this directory, run:
@@ -37,7 +46,7 @@ flutter run
 
 You may want to create a separate Android Wear OS module or integrate this `lib/` and `pubspec.yaml` into a full Flutter project created via `flutter create`.
 
-### Build and install release APK on the watch
+## Build and install release APK on the watch
 
 1. **Build the release APK**
 
