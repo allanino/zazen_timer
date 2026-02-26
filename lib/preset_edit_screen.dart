@@ -107,7 +107,7 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
               ),
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.only(top: 42, bottom: 12),
                 children: <Widget>[
             ..._steps.asMap().entries.map((MapEntry<int, _EditableStep> entry) {
               final int index = entry.key;
