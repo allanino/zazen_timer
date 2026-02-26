@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
+import 'app_colors.dart';
 import 'haptics.dart';
 import 'models.dart';
 import 'preset_edit_screen.dart';
@@ -41,9 +42,41 @@ class ZazenTimerApp extends StatelessWidget {
       title: 'Zazen Timer',
       theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: Colors.black,
-        colorScheme: const ColorScheme.dark(
-          primary: Colors.tealAccent,
-          secondary: Colors.teal,
+        colorScheme: ColorScheme.dark().copyWith(
+          primary: kAccentColor,
+          secondary: kAccentColor,
+        ),
+        switchTheme: SwitchThemeData(
+          thumbColor: MaterialStateProperty.resolveWith<Color?>(
+            (Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return kAccentColor;
+              }
+              // Darker, more muted thumb when off.
+              return const Color(0xFF7A828C);
+            },
+          ),
+          trackColor: MaterialStateProperty.resolveWith<Color?>(
+            (Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return kAccentColor.withOpacity(0.5);
+              }
+              // Darker background when off to increase contrast
+              // between off and on states.
+              return const Color(0xFF282D34);
+            },
+          ),
+          trackOutlineColor: MaterialStateProperty.resolveWith<Color?>(
+            (Set<MaterialState> states) {
+              // Remove the bright/white outline in all states so
+              // the thumb doesn't appear to have a separate margin.
+              return Colors.transparent;
+            },
+          ),
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: kAccentColor,
+          foregroundColor: Colors.black,
         ),
       ),
       home: const PresetListScreen(),
