@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'models.dart';
-import 'minute_picker_screen.dart';
+import 'time_picker_screen.dart';
 
 class PresetEditScreen extends StatefulWidget {
   final SessionPreset? preset;
@@ -169,18 +169,21 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
                           const SizedBox(width: 8),
                           TextButton(
                             onPressed: () async {
-                              final int? picked =
-                                  await Navigator.of(context).push<int>(
-                                MaterialPageRoute<int>(
+                              final (int, int, int)? result =
+                                  await Navigator.of(context).push<(int, int, int)>(
+                                MaterialPageRoute<(int, int, int)>(
                                   builder: (BuildContext context) =>
-                                      MinutePickerScreen(
-                                    initialMinutes: step.minutes,
+                                      TimePickerScreen(
+                                    title: 'Set duration',
+                                    initialHour: step.minutes ~/ 60,
+                                    initialMinute: step.minutes % 60,
+                                    initialSecond: 0,
                                   ),
                                 ),
                               );
-                              if (picked != null) {
+                              if (result != null) {
                                 setState(() {
-                                  step.minutes = picked;
+                                  step.minutes = result.$1 * 60 + result.$2;
                                 });
                               }
                             },
