@@ -14,6 +14,7 @@ class SessionEngine {
   int _currentStepIndex = 0;
   late Duration _remaining;
   Timer? _timer;
+  DateTime? _sessionStartTime;
 
   SessionEngine({
     required this.preset,
@@ -30,6 +31,9 @@ class SessionEngine {
   bool get isRunning => _timer != null;
 
   void start() {
+    _sessionStartTime = DateTime.now();
+    _currentStepIndex = 0;
+    _remaining = preset.steps.first.duration;
     _emitTick();
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
@@ -42,34 +46,65 @@ class SessionEngine {
   }
 
   void _tick() {
-    if (_remaining.inSeconds > 1) {
-      _remaining -= const Duration(seconds: 1);
-      _emitTick();
-    } else {
-      _advanceStep();
+    final DateTime? startTime = _sessionStartTime;
+    if (startTime == null) return;
+
+    final DateTime now = DateTime.now();
+    Duration elapsed = now.difference(startTime);
+    if (elapsed.isNegative) {
+      elapsed = Duration.zero;
     }
-  }
 
-  void _advanceStep() {
-    final SessionStep finishedStep = currentStep;
+    final Duration totalDuration = preset.steps.fold<Duration>(
+      Duration.zero,
+      (Duration sum, SessionStep step) => sum + step.duration,
+    );
 
-    if (_currentStepIndex + 1 < preset.steps.length) {
-      _currentStepIndex++;
-      _remaining = currentStep.duration;
-      onTransition(finishedStep, currentStep);
-      _emitTick();
-    } else {
+    if (elapsed >= totalDuration) {
       _timer?.cancel();
       _timer = null;
+      _sessionStartTime = null;
       _remaining = Duration.zero;
-      onTransition(finishedStep, null);
+      for (int i = _currentStepIndex; i < preset.steps.length - 1; i++) {
+        onTransition(preset.steps[i], preset.steps[i + 1]);
+      }
+      onTransition(preset.steps[preset.steps.length - 1], null);
       onSessionEnd();
+      return;
     }
+
+    Duration offset = Duration.zero;
+    int newStepIndex = 0;
+    for (int i = 0; i < preset.steps.length; i++) {
+      final SessionStep step = preset.steps[i];
+      final Duration stepEnd = offset + step.duration;
+      if (elapsed < stepEnd) {
+        newStepIndex = i;
+        final Duration timeIntoStep = elapsed - offset;
+        if (timeIntoStep.isNegative) {
+          _remaining = step.duration;
+        } else {
+          _remaining = step.duration - timeIntoStep;
+          if (_remaining.isNegative) {
+            _remaining = Duration.zero;
+          }
+        }
+        break;
+      }
+      offset = stepEnd;
+    }
+
+    for (int i = _currentStepIndex; i < newStepIndex; i++) {
+      onTransition(preset.steps[i], preset.steps[i + 1]);
+    }
+    _currentStepIndex = newStepIndex;
+
+    _emitTick();
   }
 
   void cancel() {
     _timer?.cancel();
     _timer = null;
+    _sessionStartTime = null;
   }
 }
-
