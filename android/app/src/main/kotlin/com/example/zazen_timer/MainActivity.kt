@@ -1,6 +1,7 @@
 package com.example.zazen_timer
 
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -31,6 +32,36 @@ class MainActivity : FlutterActivity() {
             val pattern = call.argument<List<Int>>("pattern") ?: emptyList()
             vibratePattern(pattern.map { it.toLong() }.toLongArray())
             result.success(null)
+          }
+          else -> result.notImplemented()
+        }
+      }
+
+    MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "session_service")
+      .setMethodCallHandler { call, result ->
+        when (call.method) {
+          "startSession" -> {
+            val sessionJson = call.argument<String>("session") ?: "[]"
+            startForegroundService(SessionService.intent(this, sessionJson))
+            result.success(null)
+          }
+          "stopSession" -> {
+            stopService(Intent(this, SessionService::class.java))
+            result.success(null)
+          }
+          "getSessionState" -> {
+            val state = SessionService.currentState
+            if (state == null) {
+              result.success(null)
+            } else {
+              val now = System.currentTimeMillis()
+              result.success(mapOf(
+                "stepIndex" to state.stepIndex,
+                "stepType" to state.stepType,
+                "remainingMs" to state.remainingMs(now),
+                "stepTotalMs" to state.stepDurationMs,
+              ))
+            }
           }
           else -> result.notImplemented()
         }

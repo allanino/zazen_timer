@@ -2,15 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'app_colors.dart';
-import 'haptics.dart';
 import 'models.dart';
+import 'session_service.dart';
 import 'preset_edit_screen.dart';
 import 'preset_store.dart';
-import 'session_engine.dart';
 import 'start_time_picker_screen.dart';
 import 'widgets/circular_timer.dart';
 
@@ -94,13 +94,11 @@ class PresetListScreen extends StatefulWidget {
 
 class _PresetListScreenState extends State<PresetListScreen> {
   static const String _keyHasStartedSession = 'has_started_first_session';
-  static const String _keyScreenOff = 'screen_off';
 
   final PresetStore _store = PresetStore();
   List<SessionPreset> _presets = <SessionPreset>[];
   bool _loading = true;
   bool _hasStartedSession = false;
-  bool _screenOff = false;
 
   @override
   void initState() {
@@ -132,23 +130,12 @@ class _PresetListScreenState extends State<PresetListScreen> {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       _hasStartedSession = prefs.getBool(_keyHasStartedSession) ?? false;
-      _screenOff = prefs.getBool(_keyScreenOff) ?? false;
     } catch (_) {}
     if (mounted) {
       setState(() {
         _loading = false;
       });
     }
-  }
-
-  Future<void> _setScreenOff(bool value) async {
-    setState(() {
-      _screenOff = value;
-    });
-    try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setBool(_keyScreenOff, value);
-    } catch (_) {}
   }
 
   Future<void> _markSessionStarted() async {
@@ -233,7 +220,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
   }
 
   Future<void> _startPreset(SessionPreset preset) async {
-    final _StartOptions? options = await showDialog<_StartOptions>(
+    final String? choice = await showDialog<String>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -243,29 +230,19 @@ class _PresetListScreenState extends State<PresetListScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                const Text('Start now or at a specific time?', textAlign: TextAlign.center),
+                const Text('Start session', textAlign: TextAlign.center),
                 const SizedBox(height: 8),
                 Row(
                   children: <Widget>[
                     Expanded(
                       child: TextButton(
-                        onPressed: () => Navigator.of(context).pop(
-                          _StartOptions(
-                            choice: 'now',
-                            noDisplay: _screenOff,
-                          ),
-                        ),
+                        onPressed: () => Navigator.of(context).pop('now'),
                         child: const Text('Now'),
                       ),
                     ),
                     const SizedBox(width: 8),
                     TextButton(
-                      onPressed: () => Navigator.of(context).pop(
-                        _StartOptions(
-                          choice: 'time',
-                          noDisplay: _screenOff,
-                        ),
-                      ),
+                      onPressed: () => Navigator.of(context).pop('time'),
                       child: const Text('Schedule', softWrap: false),
                     ),
                   ],
@@ -277,9 +254,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
       },
     );
 
-    if (!mounted || options == null) return;
-
-    final String choice = options.choice;
+    if (!mounted || choice == null) return;
 
     SessionPreset effective = preset;
 
@@ -327,12 +302,64 @@ class _PresetListScreenState extends State<PresetListScreen> {
 
     await _markSessionStarted();
     if (!mounted) return;
+
+    final PermissionStatus status = await Permission.notification.status;
+    if (!status.isGranted) {
+      final PermissionStatus result = await Permission.notification.request();
+      if (!result.isGranted) {
+        if (!mounted) return;
+        await showDialog<void>(
+          context: context,
+          builder: (BuildContext context) => AlertDialog(
+            insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+            contentPadding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+            actionsPadding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  const Text(
+                    'Notification permission is needed for sessions.',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () {
+                            openAppSettings();
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text('Grant'),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('Cancel'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+        return;
+      }
+    }
+    if (!mounted) return;
+    try {
+      await SessionService.startSession(preset: effective);
+    } catch (_) {
+      return;
+    }
+    if (!mounted) return;
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (BuildContext context) => SessionScreen(
-          preset: effective,
-          noDisplay: _screenOff,
-        ),
+        builder: (BuildContext context) => SessionScreen(preset: effective),
       ),
     );
   }
@@ -361,51 +388,15 @@ class _PresetListScreenState extends State<PresetListScreen> {
                   16,
                   MediaQuery.of(context).padding.bottom + 12.0,
                 ),
-                itemCount: 1 + _presets.length + 1 + (_presets.length <= 2 ? 1 : 0),
+                itemCount: (_presets.length <= 2 ? 1 : 0) + _presets.length + 1,
                 itemBuilder: (BuildContext context, int index) {
-                  if (index == 0) {
-                    final bool showDarkSessionHint = !_hasStartedSession;
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 12, bottom: 6),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          if (showDarkSessionHint) ...[
-                            Padding(
-                              padding: const EdgeInsets.only(top: 6),
-                              child: Text(
-                                'Dark session keeps the screen off during practice, using vibrations only.',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey.shade500,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                          ],
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              const Text('Dark session'),
-                              Switch(
-                                value: _screenOff,
-                                onChanged: (bool value) => _setScreenOff(value),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  final int contentIndex = index - 1;
                   final bool hasLeadingSpacer = _presets.length <= 2;
-                  if (hasLeadingSpacer && contentIndex == 0) {
+                  if (hasLeadingSpacer && index == 0) {
                     return const SizedBox(height: 8);
                   }
-                  final int presetIndex = hasLeadingSpacer ? contentIndex - 1 : contentIndex;
-                  if (presetIndex < _presets.length) {
-                    final SessionPreset preset = _presets[presetIndex];
+                  final int contentIndex = index - (hasLeadingSpacer ? 1 : 0);
+                  if (contentIndex < _presets.length) {
+                    final SessionPreset preset = _presets[contentIndex];
                     const double listHorizontalPadding = 32; // 16 + 16 from ListView padding
                     final double cardWidth = (MediaQuery.sizeOf(context).width - listHorizontalPadding).clamp(0.0, double.infinity);
                     final Widget card = SizedBox(
@@ -419,7 +410,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
                       ),
                     );
                     final bool showTapHint =
-                        presetIndex == 0 && !_hasStartedSession;
+                        contentIndex == 0 && !_hasStartedSession;
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: showTapHint
@@ -427,11 +418,14 @@ class _PresetListScreenState extends State<PresetListScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
-                                Text(
-                                  'Tap card to start session',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey.shade500,
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 12),
+                                  child: Text(
+                                    'Tap card to start session',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.grey.shade500,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 6),
@@ -706,24 +700,12 @@ class _ActionButton extends StatelessWidget {
   }
 }
 
-class _StartOptions {
-  final String choice; // 'now' or 'time'
-  final bool noDisplay;
-
-  const _StartOptions({
-    required this.choice,
-    required this.noDisplay,
-  });
-}
-
 class SessionScreen extends StatefulWidget {
   final SessionPreset preset;
-  final bool? noDisplay;
 
   const SessionScreen({
     super.key,
     required this.preset,
-    this.noDisplay,
   });
 
   @override
@@ -731,54 +713,36 @@ class SessionScreen extends StatefulWidget {
 }
 
 class _SessionScreenState extends State<SessionScreen> {
-  late SessionEngine _engine;
-  late SessionStep _currentStep;
-  late Duration _remaining;
-  late Duration _currentTotal;
+  SessionState? _state;
+  Timer? _pollTimer;
 
   @override
   void initState() {
     super.initState();
-    _currentStep = widget.preset.steps.first;
-    _remaining = _currentStep.duration;
-    _currentTotal = _currentStep.duration;
-
-    _engine = SessionEngine(
-      preset: widget.preset,
-      onTick: (SessionStep step, Duration remaining) {
-        setState(() {
-          _currentStep = step;
-          _remaining = remaining;
-          _currentTotal = step.duration;
-        });
-      },
-      onTransition: (SessionStep? finished, SessionStep? next) {
-        if (finished?.type == StepType.preStart &&
-            next?.type == StepType.zazen) {
-          Haptics.threeMedium();
-        } else if (finished?.type == StepType.zazen &&
-            next?.type == StepType.kinhin) {
-          Haptics.twoMedium();
-        } else if (finished?.type == StepType.kinhin &&
-            next?.type == StepType.zazen) {
-          Haptics.threeMedium();
-        }
-      },
-      onSessionEnd: () {
-        Haptics.oneLong();
-        if (mounted) {
-          Navigator.of(context).pop();
-        }
-      },
-    );
-
     WakelockPlus.enable();
-    _engine.start();
+    _poll();
+    _pollTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
+      if (!mounted) return;
+      _poll();
+    });
+  }
+
+  Future<void> _poll() async {
+    final SessionState? state = await SessionService.getSessionState();
+    if (!mounted) return;
+    if (state == null) {
+      _pollTimer?.cancel();
+      Navigator.of(context).pop();
+      return;
+    }
+    setState(() {
+      _state = state;
+    });
   }
 
   @override
   void dispose() {
-    _engine.cancel();
+    _pollTimer?.cancel();
     WakelockPlus.disable();
     super.dispose();
   }
@@ -808,7 +772,12 @@ class _SessionScreenState extends State<SessionScreen> {
       ),
     );
     if (stop == true && mounted) {
-      Navigator.of(context).pop();
+      _pollTimer?.cancel();
+      _pollTimer = null;
+      await SessionService.stopSession();
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
     }
   }
 
@@ -822,17 +791,17 @@ class _SessionScreenState extends State<SessionScreen> {
       },
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: (widget.noDisplay ?? false)
-            ? const ColoredBox(
-                color: Colors.black,
+        body: _state == null
+            ? const Center(
+                child: CircularProgressIndicator(),
               )
             : Center(
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: CircularTimer(
-                    remaining: _remaining,
-                    total: _currentTotal,
-                    step: _currentStep,
+                    remaining: _state!.remaining,
+                    total: _state!.stepTotal,
+                    step: _state!.toSessionStep(),
                   ),
                 ),
               ),
