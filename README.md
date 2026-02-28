@@ -32,6 +32,7 @@
 - **Circular countdown display** similar to Samsung timers, with:
   - Large, centered remaining time
   - Progress ring around the watch face
+- **Runs in background** — timer continues when the app is in the background or the screen is off.
 
 ## Running
 
