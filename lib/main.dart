@@ -14,6 +14,34 @@ import 'preset_store.dart';
 import 'time_picker_screen.dart';
 import 'widgets/circular_timer.dart';
 
+/// Wraps dialog content with a short entrance animation: fade + scale 0.95 → 1.0.
+class _AnimatedDialogContent extends StatelessWidget {
+  const _AnimatedDialogContent({required this.child});
+
+  final Widget child;
+
+  static const Duration _duration = Duration(milliseconds: 150);
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: _duration,
+      curve: Curves.easeOut,
+      builder: (BuildContext context, double value, Widget? child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.scale(
+            scale: 0.75 + 0.25 * value,
+            child: child,
+          ),
+        );
+      },
+      child: child,
+    );
+  }
+}
+
 void main() {
   // Log errors in release so they appear in logcat (e.g. adb logcat) when the app closes.
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -195,46 +223,48 @@ class _PresetListScreenState extends State<PresetListScreen> {
   Future<void> _deletePreset(SessionPreset preset) async {
     final bool? confirmed = await showDialog<bool>(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.85),
+      barrierColor: Colors.black.withOpacity(0.9),
       builder: (BuildContext context) {
         return Dialog(
           backgroundColor: Colors.transparent,
           insetPadding: EdgeInsets.zero,
           child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Text(
-                    'Delete "${preset.breakdownLabel}"? This cannot be undone.',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                  const SizedBox(height: 28),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(false),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shape: const StadiumBorder(),
+            child: _AnimatedDialogContent(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      'Delete "${preset.breakdownLabel}"? This cannot be undone.',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 28),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shape: const StadiumBorder(),
+                          ),
+                          child: const Text('Cancel'),
                         ),
-                        child: const Text('Cancel'),
-                      ),
-                      const SizedBox(width: 8),
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(true),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shape: const StadiumBorder(),
+                        const SizedBox(width: 8),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shape: const StadiumBorder(),
+                          ),
+                          child: const Text('Delete'),
                         ),
-                        child: const Text('Delete'),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -253,46 +283,48 @@ class _PresetListScreenState extends State<PresetListScreen> {
   Future<void> _startPreset(SessionPreset preset) async {
     final String? choice = await showDialog<String>(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.85),
+      barrierColor: Colors.black.withOpacity(0.9),
       builder: (BuildContext context) {
         return Dialog(
           backgroundColor: Colors.transparent,
           insetPadding: EdgeInsets.zero,
           child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  const Text(
-                    'Start session',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  const SizedBox(height: 28),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop('now'),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shape: const StadiumBorder(),
+            child: _AnimatedDialogContent(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    const Text(
+                      'Start session',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 28),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop('now'),
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shape: const StadiumBorder(),
+                          ),
+                          child: const Text('Now'),
                         ),
-                        child: const Text('Now'),
-                      ),
-                      const SizedBox(width: 8),
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop('time'),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shape: const StadiumBorder(),
+                        const SizedBox(width: 8),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop('time'),
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shape: const StadiumBorder(),
+                          ),
+                          child: const Text('Schedule', softWrap: false),
                         ),
-                        child: const Text('Schedule', softWrap: false),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -362,49 +394,51 @@ class _PresetListScreenState extends State<PresetListScreen> {
         if (!mounted) return;
         await showDialog<void>(
           context: context,
-          barrierColor: Colors.black.withOpacity(0.85),
+          barrierColor: Colors.black.withOpacity(0.9),
           builder: (BuildContext context) {
             return Dialog(
               backgroundColor: Colors.transparent,
               insetPadding: EdgeInsets.zero,
               child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      const Text(
-                        'Notification permission is needed for sessions.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      const SizedBox(height: 28),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          TextButton(
-                            onPressed: () {
-                              openAppSettings();
-                              Navigator.of(context).pop();
-                            },
-                            style: TextButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shape: const StadiumBorder(),
+                child: _AnimatedDialogContent(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        const Text(
+                          'Notification permission is needed for sessions.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        const SizedBox(height: 28),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            TextButton(
+                              onPressed: () {
+                                openAppSettings();
+                                Navigator.of(context).pop();
+                              },
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shape: const StadiumBorder(),
+                              ),
+                              child: const Text('Grant'),
                             ),
-                            child: const Text('Grant'),
-                          ),
-                          const SizedBox(width: 8),
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            style: TextButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shape: const StadiumBorder(),
+                            const SizedBox(width: 8),
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shape: const StadiumBorder(),
+                              ),
+                              child: const Text('Cancel'),
                             ),
-                            child: const Text('Cancel'),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -814,46 +848,48 @@ class _SessionScreenState extends State<SessionScreen> {
   Future<void> _onBackPressed() async {
     final bool? stop = await showDialog<bool>(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.85),
+      barrierColor: Colors.black.withOpacity(0.9),
       builder: (BuildContext context) {
         return Dialog(
           backgroundColor: Colors.transparent,
           insetPadding: EdgeInsets.zero,
           child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  const Text(
-                    'Going back will stop the current session.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  const SizedBox(height: 28),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(false),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shape: const StadiumBorder(),
+            child: _AnimatedDialogContent(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    const Text(
+                      'Going back will stop the current session.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 28),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shape: const StadiumBorder(),
+                          ),
+                          child: const Text('Cancel'),
                         ),
-                        child: const Text('Cancel'),
-                      ),
-                      const SizedBox(width: 8),
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(true),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shape: const StadiumBorder(),
+                        const SizedBox(width: 8),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shape: const StadiumBorder(),
+                          ),
+                          child: const Text('Stop'),
                         ),
-                        child: const Text('Stop'),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
