@@ -65,9 +65,12 @@ class SessionPreset {
         (Duration sum, SessionStep step) => sum + step.duration,
       );
 
+  /// Rounded minutes for display (e.g. 23m40s rounds to 24).
+  static int _roundedMinutes(Duration d) => (d.inSeconds / 60).round();
+
   int get displayMinutesTotal => displaySteps.fold<int>(
         0,
-        (int sum, SessionStep step) => sum + step.duration.inMinutes,
+        (int sum, SessionStep step) => sum + SessionPreset._roundedMinutes(step.duration),
       );
 
   String get breakdownLabel {
@@ -76,7 +79,7 @@ class SessionPreset {
     }
     return displaySteps
         .map<String>(
-          (SessionStep step) => step.duration.inMinutes.toString(),
+          (SessionStep step) => SessionPreset._roundedMinutes(step.duration).toString(),
         )
         .join(' + ');
   }
@@ -101,6 +104,8 @@ class SessionPreset {
       );
 }
 
+int _roundedMinutesFromDuration(Duration d) => (d.inSeconds / 60).round();
+
 String buildPresetNameFromSteps(List<SessionStep> steps) {
   final List<SessionStep> effectiveSteps = _displayStepsFor(steps);
   if (effectiveSteps.isEmpty) {
@@ -109,12 +114,12 @@ String buildPresetNameFromSteps(List<SessionStep> steps) {
 
   final String breakdown = effectiveSteps
       .map<String>(
-        (SessionStep step) => step.duration.inMinutes.toString(),
+        (SessionStep step) => _roundedMinutesFromDuration(step.duration).toString(),
       )
       .join(' + ');
   final int totalMinutes = effectiveSteps.fold<int>(
     0,
-    (int sum, SessionStep step) => sum + step.duration.inMinutes,
+    (int sum, SessionStep step) => sum + _roundedMinutesFromDuration(step.duration),
   );
 
   return '$breakdown ($totalMinutes min total)';

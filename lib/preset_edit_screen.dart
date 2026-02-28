@@ -16,24 +16,16 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
   final List<_EditableStep> _steps = <_EditableStep>[];
 
   @override
-  void dispose() {
-    for (final _EditableStep step in _steps) {
-      step.minutesController.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
   void initState() {
     super.initState();
     if (widget.preset != null) {
       for (final SessionStep s in widget.preset!.steps) {
-        _steps.add(_EditableStep(type: s.type, minutes: s.duration.inMinutes));
+        _steps.add(_EditableStep(type: s.type, totalSeconds: s.duration.inSeconds));
       }
     } else {
       _steps.addAll(<_EditableStep>[
-        _EditableStep(type: StepType.preStart, minutes: 1),
-        _EditableStep(type: StepType.zazen, minutes: 40),
+        _EditableStep(type: StepType.preStart, totalSeconds: 60),
+        _EditableStep(type: StepType.zazen, totalSeconds: 40 * 60),
       ]);
     }
   }
@@ -41,14 +33,13 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
   List<SessionStep> _buildSessionSteps() {
     final List<SessionStep> steps = <SessionStep>[];
     for (final _EditableStep editable in _steps) {
-      final int minutes = editable.minutes;
-      if (minutes <= 0) {
+      if (editable.totalSeconds <= 0) {
         continue;
       }
       steps.add(
         SessionStep(
           type: editable.type,
-          duration: Duration(minutes: minutes),
+          duration: Duration(seconds: editable.totalSeconds),
         ),
       );
     }
@@ -57,14 +48,13 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
 
   void _addStep() {
     setState(() {
-      _steps.add(_EditableStep(type: StepType.zazen, minutes: 10));
+      _steps.add(_EditableStep(type: StepType.zazen, totalSeconds: 10 * 60));
     });
   }
 
   void _removeStep(int index) {
     if (_steps.length <= 1) return;
     setState(() {
-      _steps[index].minutesController.dispose();
       _steps.removeAt(index);
     });
   }
@@ -165,7 +155,7 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
                       const SizedBox(height: 4),
                       Row(
                         children: <Widget>[
-                          const Text('Minutes'),
+                          const Text('Duration'),
                           const SizedBox(width: 8),
                           TextButton(
                             onPressed: () async {
@@ -175,20 +165,21 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
                                   builder: (BuildContext context) =>
                                       TimePickerScreen(
                                     title: 'Set duration',
-                                    initialHour: step.minutes ~/ 60,
-                                    initialMinute: step.minutes % 60,
-                                    initialSecond: 0,
+                                    initialHour: step.totalSeconds ~/ 3600,
+                                    initialMinute: (step.totalSeconds % 3600) ~/ 60,
+                                    initialSecond: step.totalSeconds % 60,
                                   ),
                                 ),
                               );
                               if (result != null) {
                                 setState(() {
-                                  step.minutes = result.$1 * 60 + result.$2;
+                                  step.totalSeconds =
+                                      result.$1 * 3600 + result.$2 * 60 + result.$3;
                                 });
                               }
                             },
                             child: Text(
-                              '${step.minutes} min',
+                              step.durationLabel,
                               style: const TextStyle(fontSize: 16),
                             ),
                           ),
@@ -229,18 +220,21 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
 
 class _EditableStep {
   StepType type;
-  final TextEditingController minutesController;
-
-  int get minutes => int.tryParse(minutesController.text) ?? 0;
-
-  set minutes(int value) {
-    minutesController.text = value.toString();
-  }
+  int totalSeconds;
 
   _EditableStep({
     required this.type,
-    required int minutes,
-  }) : minutesController =
-            TextEditingController(text: minutes.toString());
+    required this.totalSeconds,
+  });
+
+  /// Label like "5m" or "5m12s".
+  String get durationLabel {
+    final int totalMinutes = totalSeconds ~/ 60;
+    final int secs = totalSeconds % 60;
+    if (secs != 0) {
+      return '${totalMinutes}m${secs}s';
+    }
+    return '${totalMinutes}m';
+  }
 }
 
