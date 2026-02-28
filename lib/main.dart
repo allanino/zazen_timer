@@ -688,8 +688,8 @@ class _PresetListItemState extends State<_PresetListItem> {
                   )
                 ),
                 Container(
-                  width: 1,
-                  color: Colors.black.withOpacity(0.5), // const Color(0xFF1E2228), // slightly darker than card
+                  width: 2,
+                  color: const Color.fromARGB(255, 30, 34, 40), // slightly darker than card
                 ),
                 Expanded(
                   child: Semantics(
