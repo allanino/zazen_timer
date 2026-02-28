@@ -20,7 +20,7 @@ class CircularTimer extends StatelessWidget {
   Widget build(BuildContext context) {
     final double fraction =
         total.inMilliseconds == 0 ? 0.0 : remaining.inMilliseconds / total.inMilliseconds;
-    final int totalSeconds = (remaining.inMilliseconds / 1000).ceil();
+    final int totalSeconds = (remaining.inMilliseconds / 1000).round();
     final int minutes = totalSeconds ~/ 60;
     final int seconds = totalSeconds % 60;
 
