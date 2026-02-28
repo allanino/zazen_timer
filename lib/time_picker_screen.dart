@@ -105,7 +105,7 @@ class _TimePickerScreenState extends State<TimePickerScreen> {
             const SizedBox(height: 6),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(32, 0, 32, 24),
+                padding: const EdgeInsets.fromLTRB(32, 0, 32, 12),
                 child: Row(
                   children: <Widget>[
                     Expanded(
@@ -148,7 +148,7 @@ class _TimePickerScreenState extends State<TimePickerScreen> {
                         child: Text(
                           ':',
                           style: TextStyle(
-                            color: Colors.white70,
+                            color: Colors.white60,
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
                           ),
@@ -195,7 +195,7 @@ class _TimePickerScreenState extends State<TimePickerScreen> {
                         child: Text(
                           ':',
                           style: TextStyle(
-                            color: Colors.white70,
+                            color: Colors.white60,
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
                           ),
@@ -241,10 +241,10 @@ class _TimePickerScreenState extends State<TimePickerScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.only(bottom: 24),
               child: Center(
                 child: SizedBox(
-                  height: 44,
+                  height: 22,
                   child: ElevatedButton.icon(
                     onPressed: _finish,
                     icon: const Icon(Icons.check),
