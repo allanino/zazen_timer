@@ -481,9 +481,9 @@ class _PresetListScreenState extends State<PresetListScreen> {
               child: ListView.builder(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.fromLTRB(
-                  16,
+                  28,
                   24,
-                  16,
+                  28,
                   MediaQuery.of(context).padding.bottom + 12.0,
                 ),
                 itemCount: (_presets.length <= 2 ? 1 : 0) + _presets.length + 1,
@@ -495,7 +495,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
                   final int contentIndex = index - (hasLeadingSpacer ? 1 : 0);
                   if (contentIndex < _presets.length) {
                     final SessionPreset preset = _presets[contentIndex];
-                    const double listHorizontalPadding = 32; // 16 + 16 from ListView padding
+                    const double listHorizontalPadding = 56; // 28 + 28 from ListView padding
                     final double cardWidth = (MediaQuery.sizeOf(context).width - listHorizontalPadding).clamp(0.0, double.infinity);
                     final Widget card = SizedBox(
                       width: cardWidth,
@@ -582,8 +582,8 @@ class _PresetListItem extends StatefulWidget {
 }
 
 class _PresetListItemState extends State<_PresetListItem> {
-  static const double _actionWidth = 112;
-  static const double _gap = 6;
+  static const double _actionWidth = 84;
+  static const double _gap = 3;
   static const double _maxReveal = _actionWidth + _gap;
   double _dragOffset = 0;
   double _dragStartOffset = 0;
