@@ -785,7 +785,7 @@ class _SessionScreenState extends State<SessionScreen> {
     super.initState();
     WakelockPlus.enable();
     _poll();
-    _pollTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
+    _pollTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted) return;
       _poll();
     });
