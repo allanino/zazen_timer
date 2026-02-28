@@ -257,6 +257,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
                           onPressed: () => Navigator.of(context).pop(true),
                           style: TextButton.styleFrom(
                             backgroundColor: Colors.transparent,
+                            foregroundColor: kDeleteColor,
                             shape: const StadiumBorder(),
                           ),
                           child: const Text('Delete'),
@@ -675,7 +676,8 @@ class _PresetListItemState extends State<_PresetListItem> {
                     button: true,
                     label: 'Edit preset',
                     child: _ActionButton(
-                      color: const Color(0xFF4C7A96),
+                      backgroundColor: const Color(0xFF262B32),
+                      iconColor: kAccentColor,
                       icon: Icons.edit,
                       onTap: _handleEditTap,
                       borderRadius: const BorderRadius.only(
@@ -685,12 +687,17 @@ class _PresetListItemState extends State<_PresetListItem> {
                     ),
                   )
                 ),
+                Container(
+                  width: 1,
+                  color: Colors.black.withOpacity(0.5), // const Color(0xFF1E2228), // slightly darker than card
+                ),
                 Expanded(
                   child: Semantics(
                     button: true,
                     label: 'Delete preset',
                     child: _ActionButton(
-                      color: const Color(0xFFB05A5A),
+                      backgroundColor: const Color(0xFF262B32),
+                      iconColor: kDeleteColor,
                       icon: Icons.delete,
                       onTap: _handleDeleteTap,
                       borderRadius: const BorderRadius.only(
@@ -770,13 +777,15 @@ class _PresetListItemState extends State<_PresetListItem> {
 }
 
 class _ActionButton extends StatelessWidget {
-  final Color color;
+  final Color backgroundColor;
+  final Color iconColor;
   final IconData icon;
   final VoidCallback onTap;
   final BorderRadius borderRadius;
 
   const _ActionButton({
-    required this.color,
+    required this.backgroundColor,
+    required this.iconColor,
     required this.icon,
     required this.onTap,
     required this.borderRadius,
@@ -785,13 +794,13 @@ class _ActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: color,
+      color: backgroundColor,
       borderRadius: borderRadius,
       child: InkWell(
         onTap: onTap,
         borderRadius: borderRadius,
         child: Center(
-          child: Icon(icon, size: 22),
+          child: Icon(icon, size: 22, color: iconColor),
         ),
       ),
     );
