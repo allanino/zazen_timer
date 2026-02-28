@@ -3,6 +3,10 @@
     <string name="session_channel_name">Session</string>
     <string name="session_notification_title">Zazen Timer</string>
     <string name="session_notification_text">Session active</string>
+    <string name="session_notification_title_waiting">Waiting...</string>
+    <string name="session_notification_title_zazen">Zazen...</string>
+    <string name="session_notification_title_kinhin">Kinhin...</string>
+    <string name="session_notification_tap_to_open">Session in progress</string>
     <string name="session_step_waiting">🕰️ Waiting…</string>
     <string name="session_step_sitting">🧘 Sitting…</string>
     <string name="session_step_walking">🚶 Walking…</string>

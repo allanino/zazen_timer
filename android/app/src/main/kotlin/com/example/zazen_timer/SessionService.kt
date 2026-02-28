@@ -53,7 +53,7 @@ class SessionService : Service() {
       val step = steps.getOrNull(currentStepIndex) ?: return@Runnable
       val stepEndTime = stepStartTimeMillis + step.durationMs
 
-      notificationManager.notify(NOTIFICATION_ID, createNotification(notificationTextFor(step.type)))
+      notificationManager.notify(NOTIFICATION_ID, createNotification(step.type))
 
       if (now >= stepEndTime) {
         val nextIndex = currentStepIndex + 1
@@ -98,12 +98,12 @@ class SessionService : Service() {
     return list
   }
 
-  private fun notificationTextFor(stepType: String): String {
+  private fun notificationTitleFor(stepType: String): String {
     return when (stepType) {
-      "preStart" -> getString(R.string.session_step_waiting)
-      "zazen" -> getString(R.string.session_step_sitting)
-      "kinhin" -> getString(R.string.session_step_walking)
-      else -> getString(R.string.session_step_sitting)
+      "preStart" -> getString(R.string.session_notification_title_waiting)
+      "zazen" -> getString(R.string.session_notification_title_zazen)
+      "kinhin" -> getString(R.string.session_notification_title_kinhin)
+      else -> getString(R.string.session_notification_title_zazen)
     }
   }
 
@@ -193,7 +193,7 @@ class SessionService : Service() {
 
   private fun startForegroundWithType() {
     val step = steps.firstOrNull() ?: return
-    val notification = createNotification(notificationTextFor(step.type))
+    val notification = createNotification(step.type)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
       startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
     } else {
@@ -202,16 +202,18 @@ class SessionService : Service() {
     }
   }
 
-  private fun createNotification(contentText: String): Notification {
+  private fun createNotification(stepType: String): Notification {
     val contentIntent = PendingIntent.getActivity(
       this,
       0,
       Intent(this, MainActivity::class.java),
       PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
     )
+    val title = notificationTitleFor(stepType)
+    val contentText = getString(R.string.session_notification_tap_to_open)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       return Notification.Builder(this, CHANNEL_ID)
-        .setContentTitle(getString(R.string.session_notification_title))
+        .setContentTitle(title)
         .setContentText(contentText)
         .setSmallIcon(android.R.drawable.ic_media_play)
         .setOngoing(true)
@@ -222,7 +224,7 @@ class SessionService : Service() {
     }
     @Suppress("DEPRECATION")
     return Notification.Builder(this)
-      .setContentTitle(getString(R.string.session_notification_title))
+      .setContentTitle(title)
       .setContentText(contentText)
       .setSmallIcon(android.R.drawable.ic_media_play)
       .setOngoing(true)
