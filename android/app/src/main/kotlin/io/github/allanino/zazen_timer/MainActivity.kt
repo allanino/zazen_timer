@@ -1,4 +1,4 @@
-package com.example.zazen_timer
+package io.github.allanino.zazen_timer
 
 import android.content.Context
 import android.content.Intent

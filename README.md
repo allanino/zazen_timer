@@ -59,6 +59,8 @@ You may want to create a separate Android Wear OS module or integrate this `lib/
 
    The APK is produced at: `build/app/outputs/flutter-apk/app-release.apk`
 
+   **Release signing:** When `android/key.properties` and `android/upload-keystore.jks` exist, release builds are signed with that keystore. These files are not committed (see `android/.gitignore`). Without them, the release build falls back to debug signing so the project still builds. The default keystore uses a placeholder password (`changeme`); for production (e.g. Play Store), regenerate the keystore with a strong password (`keytool -genkey -v -keystore android/upload-keystore.jks ...`), update `android/key.properties` with the real passwords, and keep the keystore and passwords in a secure place. For CI, provide them via secrets and inject into the build environment.
+
    > Release builds use `isMinifyEnabled = false` in `android/app/build.gradle.kts` to avoid an R8/ProGuard parse error from a dependency. The APK is larger but works reliably.
 
 2. **Enable developer options on the watch**
@@ -97,6 +99,22 @@ You may want to create a separate Android Wear OS module or integrate this `lib/
    ```
 
    The `-r` flag allows replacing an existing install (e.g. a debug build). Open the app from the watch app list.
+
+### Building an app bundle (AAB) for Play Store
+
+To build a release app bundle:
+
+```bash
+flutter build appbundle --release
+```
+
+The AAB is produced at `build/app/outputs/bundle/release/app-release.aab`.
+
+If you see **"Release app bundle failed to strip debug symbols from native libraries"**:
+
+- If the verbose log says **"Failed to find cmdline-tools"**, install the Android SDK Command-line Tools (Android Studio: SDK Manager → SDK Tools → **Android SDK Command-line Tools (latest)**; or run `sdkmanager "cmdline-tools;latest"` if on PATH). Then run `flutter build appbundle --release` again.
+
+- If the verbose log says **"libflutter.so.sym or libflutter.so.dbg not present"**, the app is built with `ndk.debugSymbolLevel = "full"` in `android/app/build.gradle.kts` so that the AAB includes native symbol files and passes Flutter’s check. The AAB is larger; you can upload `build/app/outputs/native-debug-symbols/release/native-debug-symbols.zip` to Play Console for symbolicated crash reports.
 
 ## License
 
