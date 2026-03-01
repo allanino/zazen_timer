@@ -3,4 +3,5 @@
 	<!-- Minimal colors resource to avoid XML parsing errors -->
 	<color name="launcher_background">#000000</color>
 	<color name="ic_launcher_background">#000000</color>
+	<color name="launch_background">#2D2D2E</color>
 </resources>
