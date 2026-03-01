@@ -135,7 +135,7 @@ class _PresetListScreenState extends State<PresetListScreen>
   List<SessionPreset> _presets = <SessionPreset>[];
   bool _loading = true;
   bool _hasStartedSession = false;
-  SessionPreset? _pendingSessionAfterExactAlarm;
+  SessionPreset? _pendingPresetAfterExactAlarm;
 
   @override
   void initState() {
@@ -154,20 +154,15 @@ class _PresetListScreenState extends State<PresetListScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed) return;
-    final SessionPreset? pending = _pendingSessionAfterExactAlarm;
+    final SessionPreset? pending = _pendingPresetAfterExactAlarm;
     if (pending != null) {
       SessionService.canScheduleExactAlarms().then((bool granted) {
         if (!mounted) return;
         if (!granted) return; // Keep pending so next resume (after user grants in settings) can start
-        setState(() => _pendingSessionAfterExactAlarm = null);
-        _saveOngoingSessionPreset(pending);
-        SessionService.startSession(preset: pending).then((_) {
+        setState(() => _pendingPresetAfterExactAlarm = null);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => SessionScreen(preset: pending),
-            ),
-          );
+          _runSessionFlow(pending);
         });
       });
     } else {
@@ -200,6 +195,156 @@ class _PresetListScreenState extends State<PresetListScreen>
         ),
       );
     } catch (_) {}
+  }
+
+  /// Runs the session flow (start dialog, optional time picker, save, start, push)
+  /// assuming permissions are already granted.
+  Future<void> _runSessionFlow(SessionPreset preset) async {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final String? choice = await showDialog<String>(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.9),
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.zero,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.sizeOf(context).width,
+                maxHeight: MediaQuery.sizeOf(context).height - 64,
+              ),
+              child: _AnimatedDialogContent(
+                child: SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.sizeOf(context).height - 64,
+                    ),
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 20, right: 20, top: 32, bottom: 36),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Text(
+                              l10n.startSession,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            LayoutBuilder(
+                              builder: (BuildContext context, BoxConstraints constraints) {
+                                final spacing = constraints.maxWidth < 300 ? 16.0 : 28.0;
+                                return Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    SizedBox(height: spacing),
+                                    Wrap(
+                                      spacing: 8,
+                                      runSpacing: 0,
+                                      alignment: WrapAlignment.center,
+                                      children: <Widget>[
+                                        TextButton(
+                                          onPressed: () => Navigator.of(context).pop('now'),
+                                          style: TextButton.styleFrom(
+                                            backgroundColor: Colors.transparent,
+                                            shape: const StadiumBorder(),
+                                          ),
+                                          child: Text(l10n.now),
+                                        ),
+                                        TextButton(
+                                          onPressed: () => Navigator.of(context).pop('time'),
+                                          style: TextButton.styleFrom(
+                                            backgroundColor: Colors.transparent,
+                                            shape: const StadiumBorder(),
+                                          ),
+                                          child: Text(l10n.schedule, softWrap: false),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    if (!mounted || choice == null) return;
+
+    SessionPreset effective = preset;
+
+    if (choice == 'time') {
+      final DateTime now = DateTime.now();
+      final TimeOfDay initial =
+          TimeOfDay(hour: now.hour, minute: now.minute);
+      final (int, int, int)? result =
+          await Navigator.of(context).push<(int, int, int)>(
+        MaterialPageRoute<(int, int, int)>(
+          builder: (BuildContext context) => TimePickerScreen(
+            title: l10n.startTime,
+            initialHour: initial.hour,
+            initialMinute: initial.minute,
+            initialSecond: 0,
+          ),
+        ),
+      );
+      if (!mounted || result == null) return;
+      final int secondsOfDay =
+          result.$1 * 3600 + result.$2 * 60 + result.$3;
+      final int nowSeconds =
+          now.hour * 3600 + now.minute * 60 + now.second;
+      int diffSeconds = secondsOfDay - nowSeconds;
+      if (diffSeconds < 0) diffSeconds += 24 * 3600;
+
+      final List<SessionStep> steps = <SessionStep>[...preset.steps];
+      final Duration preStartDuration = Duration(seconds: diffSeconds);
+
+      if (steps.isNotEmpty && steps.first.type == StepType.preStart) {
+        steps[0] = SessionStep(
+          type: StepType.preStart,
+          duration: preStartDuration,
+        );
+      } else {
+        steps.insert(
+          0,
+          SessionStep(
+            type: StepType.preStart,
+            duration: preStartDuration,
+          ),
+        );
+      }
+
+      effective = SessionPreset(
+        id: preset.id,
+        name: preset.name,
+        steps: steps,
+      );
+    }
+
+    await _markSessionStarted();
+    if (!mounted) return;
+
+    await _saveOngoingSessionPreset(effective);
+    try {
+      await SessionService.startSession(preset: effective);
+    } catch (_) {
+      return;
+    }
+    if (!mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => SessionScreen(preset: effective),
+      ),
+    );
   }
 
   Future<void> _loadPresets() async {
@@ -377,139 +522,7 @@ class _PresetListScreenState extends State<PresetListScreen>
   }
 
   Future<void> _startPreset(SessionPreset preset) async {
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
-    final String? choice = await showDialog<String>(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.9),
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: EdgeInsets.zero,
-          child: Center(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.sizeOf(context).width,
-                maxHeight: MediaQuery.sizeOf(context).height - 64,
-              ),
-              child: _AnimatedDialogContent(
-                child: SingleChildScrollView(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: MediaQuery.sizeOf(context).height - 64,
-                    ),
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 20, right: 20, top: 32, bottom: 36),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Text(
-                              l10n.startSession,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        LayoutBuilder(
-                          builder: (BuildContext context, BoxConstraints constraints) {
-                            final spacing = constraints.maxWidth < 300 ? 16.0 : 28.0;
-                            return Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                SizedBox(height: spacing),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 0,
-                                  alignment: WrapAlignment.center,
-                                  children: <Widget>[
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop('now'),
-                                      style: TextButton.styleFrom(
-                                        backgroundColor: Colors.transparent,
-                                        shape: const StadiumBorder(),
-                                      ),
-                                      child: Text(l10n.now),
-                                    ),
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop('time'),
-                                      style: TextButton.styleFrom(
-                                        backgroundColor: Colors.transparent,
-                                        shape: const StadiumBorder(),
-                                      ),
-                                      child: Text(l10n.schedule, softWrap: false),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-
-    if (!mounted || choice == null) return;
-
-    SessionPreset effective = preset;
-
-    if (choice == 'time') {
-      final DateTime now = DateTime.now();
-      final TimeOfDay initial =
-          TimeOfDay(hour: now.hour, minute: now.minute);
-      final (int, int, int)? result =
-          await Navigator.of(context).push<(int, int, int)>(
-        MaterialPageRoute<(int, int, int)>(
-          builder: (BuildContext context) => TimePickerScreen(
-            title: l10n.startTime,
-            initialHour: initial.hour,
-            initialMinute: initial.minute,
-            initialSecond: 0,
-          ),
-        ),
-      );
-      if (!mounted || result == null) return;
-      final int secondsOfDay =
-          result.$1 * 3600 + result.$2 * 60 + result.$3;
-      final int nowSeconds =
-          now.hour * 3600 + now.minute * 60 + now.second;
-      int diffSeconds = secondsOfDay - nowSeconds;
-      if (diffSeconds < 0) diffSeconds += 24 * 3600;
-
-      final List<SessionStep> steps = <SessionStep>[...preset.steps];
-      final Duration preStartDuration = Duration(seconds: diffSeconds);
-
-      if (steps.isNotEmpty && steps.first.type == StepType.preStart) {
-        steps[0] = SessionStep(
-          type: StepType.preStart,
-          duration: preStartDuration,
-        );
-      } else {
-        steps.insert(
-          0,
-          SessionStep(
-            type: StepType.preStart,
-            duration: preStartDuration,
-          ),
-        );
-      }
-
-      effective = SessionPreset(
-        id: preset.id,
-        name: preset.name,
-        steps: steps,
-      );
-    }
-
-    await _markSessionStarted();
-    if (!mounted) return;
-
+    // Request permissions before showing the start session dialog.
     final PermissionStatus status = await Permission.notification.status;
     if (!status.isGranted) {
       if (!mounted) return;
@@ -598,10 +611,11 @@ class _PresetListScreenState extends State<PresetListScreen>
       if (notificationGranted != true) return;
     }
     if (!mounted) return;
+
     final bool canExactAlarms = await SessionService.canScheduleExactAlarms();
     if (!canExactAlarms) {
       if (!mounted) return;
-      setState(() => _pendingSessionAfterExactAlarm = effective);
+      setState(() => _pendingPresetAfterExactAlarm = preset);
       final AppLocalizations permL10n = AppLocalizations.of(context)!;
       await showDialog<void>(
         context: context,
@@ -647,7 +661,7 @@ class _PresetListScreenState extends State<PresetListScreen>
                                         children: <Widget>[
                                           TextButton(
                                             onPressed: () {
-                                              setState(() => _pendingSessionAfterExactAlarm = null);
+                                              setState(() => _pendingPresetAfterExactAlarm = null);
                                               Navigator.of(context).pop();
                                             },
                                             style: TextButton.styleFrom(
@@ -688,18 +702,8 @@ class _PresetListScreenState extends State<PresetListScreen>
       return;
     }
     if (!mounted) return;
-    await _saveOngoingSessionPreset(effective);
-    try {
-      await SessionService.startSession(preset: effective);
-    } catch (_) {
-      return;
-    }
-    if (!mounted) return;
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) => SessionScreen(preset: effective),
-      ),
-    );
+
+    await _runSessionFlow(preset);
   }
 
   @override
