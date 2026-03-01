@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'l10n/app_localizations.dart';
+
 class TimePickerScreen extends StatefulWidget {
   final String title;
   final int initialHour;
@@ -248,7 +250,7 @@ class _TimePickerScreenState extends State<TimePickerScreen> {
                   child: ElevatedButton.icon(
                     onPressed: _finish,
                     icon: const Icon(Icons.check),
-                    label: const Text('Confirm'),
+                    label: Text(AppLocalizations.of(context)!.confirm),
                     style: ElevatedButton.styleFrom(
                       shape: const StadiumBorder(),
                       padding: const EdgeInsets.symmetric(horizontal: 20),

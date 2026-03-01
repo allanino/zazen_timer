@@ -1,0 +1,56 @@
+{
+  "@@locale": "en",
+  "appTitle": "Zazen Timer",
+  "deletePresetConfirm": "Delete \"{presetName}\"? This cannot be undone.",
+  "@deletePresetConfirm": {
+    "placeholders": {
+      "presetName": {
+        "type": "String"
+      }
+    }
+  },
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "startSession": "Start session",
+  "now": "Now",
+  "schedule": "Schedule",
+  "startTime": "Start time",
+  "notificationPermissionMessage": "Notification permission is needed for sessions.",
+  "grant": "Grant",
+  "goingBackStopsSession": "Going back will stop the current session.",
+  "stop": "Stop",
+  "tapCardToStartSession": "Tap card to start session",
+  "newPreset": "New preset",
+  "editPreset": "Edit preset",
+  "deletePreset": "Delete preset",
+  "addAtLeastOneStep": "Add at least one step with duration.",
+  "preStart": "Pre-start",
+  "zazen": "Zazen",
+  "kinhin": "Kinhin",
+  "duration": "Duration",
+  "setDuration": "Set duration",
+  "addStep": "Add step",
+  "savePreset": "Save preset",
+  "confirm": "Confirm",
+  "untilStart": "Until start",
+  "minutesTotal": "{count} min total",
+  "@minutesTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "session": "Session",
+  "presetNameWithTotal": "{breakdown} ({total} min total)",
+  "@presetNameWithTotal": {
+    "placeholders": {
+      "breakdown": {
+        "type": "String"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  }
+}

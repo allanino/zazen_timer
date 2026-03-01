@@ -2,7 +2,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models.dart';
+import '../step_type_labels.dart';
 
 class CircularTimer extends StatelessWidget {
   final Duration remaining;
@@ -45,7 +47,7 @@ class CircularTimer extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                step.label,
+                stepTypeLabel(step.type, AppLocalizations.of(context)!),
                 style: const TextStyle(
                   fontSize: 14,
                   color: Colors.white70,

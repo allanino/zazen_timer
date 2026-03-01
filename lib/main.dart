@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'app_colors.dart';
+import 'l10n/app_localizations.dart';
 import 'models.dart';
 import 'session_service.dart';
 import 'preset_edit_screen.dart';
@@ -69,6 +70,8 @@ class ZazenTimerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Zazen Timer',
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: Colors.black,
         colorScheme: ColorScheme.dark().copyWith(
@@ -221,6 +224,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
   }
 
   Future<void> _deletePreset(SessionPreset preset) async {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     final bool? confirmed = await showDialog<bool>(
       context: context,
       barrierColor: Colors.black.withOpacity(0.9),
@@ -236,7 +240,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Text(
-                      'Delete "${preset.breakdownLabel}"? This cannot be undone.',
+                      l10n.deletePresetConfirm(preset.breakdownLabel),
                       textAlign: TextAlign.center,
                       style: const TextStyle(color: Colors.white),
                     ),
@@ -250,7 +254,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
                             backgroundColor: Colors.transparent,
                             shape: const StadiumBorder(),
                           ),
-                          child: const Text('Cancel'),
+                          child: Text(l10n.cancel),
                         ),
                         const SizedBox(width: 8),
                         TextButton(
@@ -260,7 +264,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
                             foregroundColor: kDeleteColor,
                             shape: const StadiumBorder(),
                           ),
-                          child: const Text('Delete'),
+                          child: Text(l10n.delete),
                         ),
                       ],
                     ),
@@ -282,6 +286,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
   }
 
   Future<void> _startPreset(SessionPreset preset) async {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     final String? choice = await showDialog<String>(
       context: context,
       barrierColor: Colors.black.withOpacity(0.9),
@@ -296,10 +301,10 @@ class _PresetListScreenState extends State<PresetListScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    const Text(
-                      'Start session',
+                    Text(
+                      l10n.startSession,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white),
                     ),
                     const SizedBox(height: 28),
                     Row(
@@ -311,7 +316,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
                             backgroundColor: Colors.transparent,
                             shape: const StadiumBorder(),
                           ),
-                          child: const Text('Now'),
+                          child: Text(l10n.now),
                         ),
                         const SizedBox(width: 8),
                         TextButton(
@@ -320,7 +325,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
                             backgroundColor: Colors.transparent,
                             shape: const StadiumBorder(),
                           ),
-                          child: const Text('Schedule', softWrap: false),
+                          child: Text(l10n.schedule, softWrap: false),
                         ),
                       ],
                     ),
@@ -345,7 +350,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
           await Navigator.of(context).push<(int, int, int)>(
         MaterialPageRoute<(int, int, int)>(
           builder: (BuildContext context) => TimePickerScreen(
-            title: 'Start time',
+            title: l10n.startTime,
             initialHour: initial.hour,
             initialMinute: initial.minute,
             initialSecond: 0,
@@ -393,6 +398,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
       final PermissionStatus result = await Permission.notification.request();
       if (!result.isGranted) {
         if (!mounted) return;
+        final AppLocalizations permL10n = AppLocalizations.of(context)!;
         await showDialog<void>(
           context: context,
           barrierColor: Colors.black.withOpacity(0.9),
@@ -407,10 +413,10 @@ class _PresetListScreenState extends State<PresetListScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        const Text(
-                          'Notification permission is needed for sessions.',
+                        Text(
+                          permL10n.notificationPermissionMessage,
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white),
+                          style: const TextStyle(color: Colors.white),
                         ),
                         const SizedBox(height: 28),
                         Row(
@@ -425,7 +431,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
                                 backgroundColor: Colors.transparent,
                                 shape: const StadiumBorder(),
                               ),
-                              child: const Text('Grant'),
+                              child: Text(permL10n.grant),
                             ),
                             const SizedBox(width: 8),
                             TextButton(
@@ -434,7 +440,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
                                 backgroundColor: Colors.transparent,
                                 shape: const StadiumBorder(),
                               ),
-                              child: const Text('Cancel'),
+                              child: Text(permL10n.cancel),
                             ),
                           ],
                         ),
@@ -520,7 +526,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
                                 Padding(
                                   padding: const EdgeInsets.only(top: 12),
                                   child: Text(
-                                    'Tap card to start session',
+                                    AppLocalizations.of(context)!.tapCardToStartSession,
                                     style: TextStyle(
                                       fontSize: 13,
                                       color: Colors.grey.shade500,
@@ -544,7 +550,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
                         child: ElevatedButton.icon(
                           onPressed: _createPreset,
                           icon: const Icon(Icons.add),
-                          label: const Text('New preset'),
+                          label: Text(AppLocalizations.of(context)!.newPreset),
                           style: ElevatedButton.styleFrom(
                             shape: const StadiumBorder(),
                             padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -674,7 +680,7 @@ class _PresetListItemState extends State<_PresetListItem> {
                 Expanded(
                   child: Semantics(
                     button: true,
-                    label: 'Edit preset',
+                    label: AppLocalizations.of(context)!.editPreset,
                     child: _ActionButton(
                       backgroundColor: const Color(0xFF262B32),
                       iconColor: kAccentColor,
@@ -694,7 +700,7 @@ class _PresetListItemState extends State<_PresetListItem> {
                 Expanded(
                   child: Semantics(
                     button: true,
-                    label: 'Delete preset',
+                    label: AppLocalizations.of(context)!.deletePreset,
                     child: _ActionButton(
                       backgroundColor: const Color(0xFF262B32),
                       iconColor: kDeleteColor,
@@ -755,7 +761,7 @@ class _PresetListItemState extends State<_PresetListItem> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              widget.preset.totalLabel,
+                              AppLocalizations.of(context)!.minutesTotal(widget.preset.displayMinutesTotal),
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.grey.shade400,
@@ -869,10 +875,10 @@ class _SessionScreenState extends State<SessionScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    const Text(
-                      'Going back will stop the current session.',
+                    Text(
+                      AppLocalizations.of(context)!.goingBackStopsSession,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white),
                     ),
                     const SizedBox(height: 28),
                     Row(
@@ -884,7 +890,7 @@ class _SessionScreenState extends State<SessionScreen> {
                             backgroundColor: Colors.transparent,
                             shape: const StadiumBorder(),
                           ),
-                          child: const Text('Cancel'),
+                          child: Text(AppLocalizations.of(context)!.cancel),
                         ),
                         const SizedBox(width: 8),
                         TextButton(
@@ -893,7 +899,7 @@ class _SessionScreenState extends State<SessionScreen> {
                             backgroundColor: Colors.transparent,
                             shape: const StadiumBorder(),
                           ),
-                          child: const Text('Stop'),
+                          child: Text(AppLocalizations.of(context)!.stop),
                         ),
                       ],
                     ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'l10n/app_localizations.dart';
 import 'models.dart';
+import 'step_type_labels.dart';
 import 'time_picker_screen.dart';
 
 class PresetEditScreen extends StatefulWidget {
@@ -63,13 +65,20 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
     final List<SessionStep> steps = _buildSessionSteps();
 
     if (steps.isEmpty) {
+      final AppLocalizations l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Add at least one step with duration.')),
+        SnackBar(content: Text(l10n.addAtLeastOneStep)),
       );
       return;
     }
 
-    final String name = buildPresetNameFromSteps(steps);
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final String name = buildPresetNameFromSteps(
+      steps,
+      emptyName: l10n.session,
+      withTotal: (String breakdown, int total) =>
+          l10n.presetNameWithTotal(breakdown, total),
+    );
 
     final SessionPreset preset = SessionPreset(
       id: widget.preset?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
@@ -129,11 +138,8 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
                                         DropdownMenuItem<StepType>(
                                       value: t,
                                       child: Text(
-                                        switch (t) {
-                                          StepType.preStart => 'Pre-start',
-                                          StepType.zazen => 'Zazen',
-                                          StepType.kinhin => 'Kinhin',
-                                        },
+                                        stepTypeDropdownLabel(
+                                            t, AppLocalizations.of(context)!),
                                       ),
                                     ),
                                   )
@@ -155,7 +161,7 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
                       const SizedBox(height: 4),
                       Row(
                         children: <Widget>[
-                          const Text('Duration'),
+                          Text(AppLocalizations.of(context)!.duration),
                           const SizedBox(width: 8),
                           TextButton(
                             onPressed: () async {
@@ -164,7 +170,7 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
                                 MaterialPageRoute<(int, int, int)>(
                                   builder: (BuildContext context) =>
                                       TimePickerScreen(
-                                    title: 'Set duration',
+                                    title: AppLocalizations.of(context)!.setDuration,
                                     initialHour: step.totalSeconds ~/ 3600,
                                     initialMinute: (step.totalSeconds % 3600) ~/ 60,
                                     initialSecond: step.totalSeconds % 60,
@@ -196,7 +202,7 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
               child: ElevatedButton.icon(
                 onPressed: _addStep,
                 icon: const Icon(Icons.add),
-                label: const Text('Add step'),
+                label: Text(AppLocalizations.of(context)!.addStep),
               ),
             ),
             const SizedBox(height: 8),
@@ -205,7 +211,7 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _save,
                       icon: const Icon(Icons.check),
-                      label: const Text('Save preset'),
+                      label: Text(AppLocalizations.of(context)!.savePreset),
                     ),
                   ),
                 ],

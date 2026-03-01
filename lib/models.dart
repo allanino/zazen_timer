@@ -9,17 +9,6 @@ class SessionStep {
     required this.duration,
   });
 
-  String get label {
-    switch (type) {
-      case StepType.preStart:
-        return 'Until start';
-      case StepType.zazen:
-        return 'Zazen';
-      case StepType.kinhin:
-        return 'Kinhin';
-    }
-  }
-
   Map<String, dynamic> toJson() => <String, dynamic>{
         'type': type.name,
         'durationSeconds': duration.inSeconds,
@@ -84,8 +73,6 @@ class SessionPreset {
         .join(' + ');
   }
 
-  String get totalLabel => '$displayMinutesTotal min total';
-
   Map<String, dynamic> toJson() => <String, dynamic>{
         'id': id,
         'name': name,
@@ -106,10 +93,16 @@ class SessionPreset {
 
 int _roundedMinutesFromDuration(Duration d) => (d.inSeconds / 60).round();
 
-String buildPresetNameFromSteps(List<SessionStep> steps) {
+/// Builds a display name for a preset from its steps. Use [emptyName] when there
+/// are no display steps, and [withTotal] for "{breakdown} ({total} min total)".
+String buildPresetNameFromSteps(
+  List<SessionStep> steps, {
+  required String emptyName,
+  required String Function(String breakdown, int total) withTotal,
+}) {
   final List<SessionStep> effectiveSteps = _displayStepsFor(steps);
   if (effectiveSteps.isEmpty) {
-    return 'Session';
+    return emptyName;
   }
 
   final String breakdown = effectiveSteps
@@ -122,7 +115,7 @@ String buildPresetNameFromSteps(List<SessionStep> steps) {
     (int sum, SessionStep step) => sum + _roundedMinutesFromDuration(step.duration),
   );
 
-  return '$breakdown ($totalMinutes min total)';
+  return withTotal(breakdown, totalMinutes);
 }
 
 
