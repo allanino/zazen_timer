@@ -51,13 +51,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get tapCardToStartSession => 'Toca la tarjeta para iniciar la sesión';
 
   @override
-  String get newPreset => 'Nueva plantilla';
+  String get newPreset => 'Nueva preset';
 
   @override
-  String get editPreset => 'Editar plantilla';
+  String get editPreset => 'Editar preset';
 
   @override
-  String get deletePreset => 'Eliminar plantilla';
+  String get deletePreset => 'Eliminar preset';
 
   @override
   String get addAtLeastOneStep => 'Añade al menos un paso con duración.';
@@ -81,7 +81,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get addStep => 'Añadir paso';
 
   @override
-  String get savePreset => 'Guardar plantilla';
+  String get savePreset => 'Guardar preset';
 
   @override
   String get confirm => 'Confirmar';

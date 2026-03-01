@@ -87,7 +87,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get confirm => 'Confirmar';
 
   @override
-  String get untilStart => 'Até o início';
+  String get untilStart => 'Até começar';
 
   @override
   String minutesTotal(int count) {
