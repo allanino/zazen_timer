@@ -24,12 +24,12 @@ class Haptics {
 
   /// Three medium vibrations – used at zazen start and kinhin -> zazen.
   static Future<void> threeMedium() async {
-    await _pattern(<int>[0, 100, 200, 100, 200, 100]);
+    await _pattern(<int>[0, 220, 380, 220, 420, 280]);
   }
 
   /// Two medium vibrations – used at zazen -> kinhin.
   static Future<void> twoMedium() async {
-    await _pattern(<int>[0, 100, 200, 100]);
+    await _pattern(<int>[0, 220, 420, 280]);
   }
 
   /// One long vibration – used at session end.
@@ -37,7 +37,7 @@ class Haptics {
     try {
       await _channel.invokeMethod<void>(
         'vibrateOneShot',
-        <String, dynamic>{'durationMs': 300},
+        <String, dynamic>{'durationMs': 500},
       );
     } catch (_) {
       // Ignore.
