@@ -27,7 +27,7 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
     } else {
       _steps.addAll(<_EditableStep>[
         _EditableStep(type: StepType.preStart, totalSeconds: 60),
-        _EditableStep(type: StepType.zazen, totalSeconds: 40 * 60),
+        _EditableStep(type: StepType.zazen, totalSeconds: 20 * 60),
       ]);
     }
   }
@@ -50,7 +50,28 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
 
   void _addStep() {
     setState(() {
-      _steps.add(_EditableStep(type: StepType.zazen, totalSeconds: 10 * 60));
+      final StepType nextType;
+      final int nextSeconds;
+      if (_steps.isEmpty) {
+        nextType = StepType.zazen;
+        nextSeconds = 20 * 60;
+      } else {
+        switch (_steps.last.type) {
+          case StepType.zazen:
+            nextType = StepType.kinhin;
+            nextSeconds = 10 * 60;
+            break;
+          case StepType.kinhin:
+            nextType = StepType.zazen;
+            nextSeconds = 20 * 60;
+            break;
+          case StepType.preStart:
+            nextType = StepType.zazen;
+            nextSeconds = 20 * 60;
+            break;
+        }
+      }
+      _steps.add(_EditableStep(type: nextType, totalSeconds: nextSeconds));
     });
   }
 
