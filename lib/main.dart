@@ -233,42 +233,61 @@ class _PresetListScreenState extends State<PresetListScreen> {
           backgroundColor: Colors.transparent,
           insetPadding: EdgeInsets.zero,
           child: Center(
-            child: _AnimatedDialogContent(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(
-                      l10n.deletePresetConfirm(preset.breakdownLabel),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    const SizedBox(height: 28),
-                    Row(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.sizeOf(context).width,
+                maxHeight: MediaQuery.sizeOf(context).height - 64,
+              ),
+              child: _AnimatedDialogContent(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
+                    child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(false),
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shape: const StadiumBorder(),
-                          ),
-                          child: Text(l10n.cancel),
+                        Text(
+                          l10n.deletePresetConfirm(preset.breakdownLabel),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.white),
                         ),
-                        const SizedBox(width: 8),
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(true),
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            foregroundColor: kDeleteColor,
-                            shape: const StadiumBorder(),
-                          ),
-                          child: Text(l10n.delete),
+                        LayoutBuilder(
+                          builder: (BuildContext context, BoxConstraints constraints) {
+                            final spacing = constraints.maxWidth < 300 ? 16.0 : 28.0;
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                SizedBox(height: spacing),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 0,
+                                  alignment: WrapAlignment.center,
+                                  children: <Widget>[
+                                    TextButton(
+                                      onPressed: () => Navigator.of(context).pop(false),
+                                      style: TextButton.styleFrom(
+                                        backgroundColor: Colors.transparent,
+                                        shape: const StadiumBorder(),
+                                      ),
+                                      child: Text(l10n.cancel),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => Navigator.of(context).pop(true),
+                                      style: TextButton.styleFrom(
+                                        backgroundColor: Colors.transparent,
+                                        foregroundColor: kDeleteColor,
+                                        shape: const StadiumBorder(),
+                                      ),
+                                      child: Text(l10n.delete),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -295,41 +314,60 @@ class _PresetListScreenState extends State<PresetListScreen> {
           backgroundColor: Colors.transparent,
           insetPadding: EdgeInsets.zero,
           child: Center(
-            child: _AnimatedDialogContent(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(
-                      l10n.startSession,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    const SizedBox(height: 28),
-                    Row(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.sizeOf(context).width,
+                maxHeight: MediaQuery.sizeOf(context).height - 64,
+              ),
+              child: _AnimatedDialogContent(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
+                    child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop('now'),
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shape: const StadiumBorder(),
-                          ),
-                          child: Text(l10n.now),
+                        Text(
+                          l10n.startSession,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.white),
                         ),
-                        const SizedBox(width: 8),
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop('time'),
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shape: const StadiumBorder(),
-                          ),
-                          child: Text(l10n.schedule, softWrap: false),
+                        LayoutBuilder(
+                          builder: (BuildContext context, BoxConstraints constraints) {
+                            final spacing = constraints.maxWidth < 300 ? 16.0 : 28.0;
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                SizedBox(height: spacing),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 0,
+                                  alignment: WrapAlignment.center,
+                                  children: <Widget>[
+                                    TextButton(
+                                      onPressed: () => Navigator.of(context).pop('now'),
+                                      style: TextButton.styleFrom(
+                                        backgroundColor: Colors.transparent,
+                                        shape: const StadiumBorder(),
+                                      ),
+                                      child: Text(l10n.now),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => Navigator.of(context).pop('time'),
+                                      style: TextButton.styleFrom(
+                                        backgroundColor: Colors.transparent,
+                                        shape: const StadiumBorder(),
+                                      ),
+                                      child: Text(l10n.schedule, softWrap: false),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -407,44 +445,63 @@ class _PresetListScreenState extends State<PresetListScreen> {
               backgroundColor: Colors.transparent,
               insetPadding: EdgeInsets.zero,
               child: Center(
-                child: _AnimatedDialogContent(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Text(
-                          permL10n.notificationPermissionMessage,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        const SizedBox(height: 28),
-                        Row(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: MediaQuery.sizeOf(context).width,
+                    maxHeight: MediaQuery.sizeOf(context).height - 64,
+                  ),
+                  child: _AnimatedDialogContent(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
+                        child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
-                            TextButton(
-                              onPressed: () {
-                                openAppSettings();
-                                Navigator.of(context).pop();
-                              },
-                              style: TextButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                shape: const StadiumBorder(),
-                              ),
-                              child: Text(permL10n.grant),
+                            Text(
+                              permL10n.notificationPermissionMessage,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(color: Colors.white),
                             ),
-                            const SizedBox(width: 8),
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              style: TextButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                shape: const StadiumBorder(),
-                              ),
-                              child: Text(permL10n.cancel),
+                            LayoutBuilder(
+                              builder: (BuildContext context, BoxConstraints constraints) {
+                                final spacing = constraints.maxWidth < 300 ? 16.0 : 28.0;
+                                return Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    SizedBox(height: spacing),
+                                    Wrap(
+                                      spacing: 8,
+                                      runSpacing: 0,
+                                      alignment: WrapAlignment.center,
+                                      children: <Widget>[
+                                        TextButton(
+                                          onPressed: () {
+                                            openAppSettings();
+                                            Navigator.of(context).pop();
+                                          },
+                                          style: TextButton.styleFrom(
+                                            backgroundColor: Colors.transparent,
+                                            shape: const StadiumBorder(),
+                                          ),
+                                          child: Text(permL10n.grant),
+                                        ),
+                                        TextButton(
+                                          onPressed: () => Navigator.of(context).pop(),
+                                          style: TextButton.styleFrom(
+                                            backgroundColor: Colors.transparent,
+                                            shape: const StadiumBorder(),
+                                          ),
+                                          child: Text(permL10n.cancel),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                );
+                              },
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -869,41 +926,60 @@ class _SessionScreenState extends State<SessionScreen> {
           backgroundColor: Colors.transparent,
           insetPadding: EdgeInsets.zero,
           child: Center(
-            child: _AnimatedDialogContent(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(
-                      AppLocalizations.of(context)!.goingBackStopsSession,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    const SizedBox(height: 28),
-                    Row(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.sizeOf(context).width,
+                maxHeight: MediaQuery.sizeOf(context).height - 64,
+              ),
+              child: _AnimatedDialogContent(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
+                    child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(false),
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shape: const StadiumBorder(),
-                          ),
-                          child: Text(AppLocalizations.of(context)!.cancel),
+                        Text(
+                          AppLocalizations.of(context)!.goingBackStopsSession,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.white),
                         ),
-                        const SizedBox(width: 8),
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(true),
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shape: const StadiumBorder(),
-                          ),
-                          child: Text(AppLocalizations.of(context)!.stop),
+                        LayoutBuilder(
+                          builder: (BuildContext context, BoxConstraints constraints) {
+                            final spacing = constraints.maxWidth < 300 ? 16.0 : 28.0;
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                SizedBox(height: spacing),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 0,
+                                  alignment: WrapAlignment.center,
+                                  children: <Widget>[
+                                    TextButton(
+                                      onPressed: () => Navigator.of(context).pop(false),
+                                      style: TextButton.styleFrom(
+                                        backgroundColor: Colors.transparent,
+                                        shape: const StadiumBorder(),
+                                      ),
+                                      child: Text(AppLocalizations.of(context)!.cancel),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => Navigator.of(context).pop(true),
+                                      style: TextButton.styleFrom(
+                                        backgroundColor: Colors.transparent,
+                                        shape: const StadiumBorder(),
+                                      ),
+                                      child: Text(AppLocalizations.of(context)!.stop),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
