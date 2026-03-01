@@ -39,6 +39,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Se necesita permiso de notificaciones para las sesiones.';
 
   @override
+  String get exactAlarmPermissionMessage =>
+      'Se necesita permiso de alarma exacta para que las vibraciones se activen a tiempo con la pantalla apagada. Concede «Alarmas y recordatorios» en la siguiente pantalla.';
+
+  @override
   String get grant => 'Conceder';
 
   @override

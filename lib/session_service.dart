@@ -96,6 +96,29 @@ class SessionService {
     }
   }
 
+  /// Returns true if the app can schedule exact alarms (Android 12+).
+  /// On web or older Android, returns true.
+  static Future<bool> canScheduleExactAlarms() async {
+    if (kIsWeb) return true;
+    try {
+      final bool? result =
+          await _channel.invokeMethod<bool>('canScheduleExactAlarms');
+      return result ?? true;
+    } on PlatformException catch (_) {
+      return true;
+    }
+  }
+
+  /// Opens system settings so the user can grant exact alarm permission (Android 12+).
+  static Future<void> openExactAlarmSettings() async {
+    if (kIsWeb) return;
+    try {
+      await _channel.invokeMethod<void>('openExactAlarmSettings');
+    } on PlatformException catch (_) {
+      rethrow;
+    }
+  }
+
   /// Returns current session state from the service or local runner, or null if no session is running.
   static Future<SessionState?> getSessionState() async {
     if (kIsWeb) {

@@ -39,6 +39,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Notification permission is needed for sessions.';
 
   @override
+  String get exactAlarmPermissionMessage =>
+      'For precision with the screen off, allow “Alarms & reminders”.';
+
+  @override
   String get grant => 'Grant';
 
   @override

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,9 @@ import 'preset_edit_screen.dart';
 import 'preset_store.dart';
 import 'time_picker_screen.dart';
 import 'widgets/circular_timer.dart';
+
+/// SharedPreferences key for the preset of the currently running session (restore SessionScreen when app is reopened).
+const String _kOngoingSessionPresetKey = 'ongoing_session_preset';
 
 /// Wraps dialog content with a short entrance animation: fade + scale 0.95 → 1.0.
 class _AnimatedDialogContent extends StatelessWidget {
@@ -123,18 +127,79 @@ class PresetListScreen extends StatefulWidget {
   State<PresetListScreen> createState() => _PresetListScreenState();
 }
 
-class _PresetListScreenState extends State<PresetListScreen> {
+class _PresetListScreenState extends State<PresetListScreen>
+    with WidgetsBindingObserver {
   static const String _keyHasStartedSession = 'has_started_first_session';
 
   final PresetStore _store = PresetStore();
   List<SessionPreset> _presets = <SessionPreset>[];
   bool _loading = true;
   bool _hasStartedSession = false;
+  SessionPreset? _pendingSessionAfterExactAlarm;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadPresets();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _restoreSessionIfRunning());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    final SessionPreset? pending = _pendingSessionAfterExactAlarm;
+    if (pending != null) {
+      SessionService.canScheduleExactAlarms().then((bool granted) {
+        if (!mounted) return;
+        if (!granted) return; // Keep pending so next resume (after user grants in settings) can start
+        setState(() => _pendingSessionAfterExactAlarm = null);
+        _saveOngoingSessionPreset(pending);
+        SessionService.startSession(preset: pending).then((_) {
+          if (!mounted) return;
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (BuildContext context) => SessionScreen(preset: pending),
+            ),
+          );
+        });
+      });
+    } else {
+      _restoreSessionIfRunning();
+    }
+  }
+
+  Future<void> _saveOngoingSessionPreset(SessionPreset preset) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_kOngoingSessionPresetKey, jsonEncode(preset.toJson()));
+    } catch (_) {}
+  }
+
+  Future<void> _restoreSessionIfRunning() async {
+    if (ModalRoute.of(context)?.isCurrent != true) return;
+    final SessionState? state = await SessionService.getSessionState();
+    if (!mounted || state == null) return;
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String? json = prefs.getString(_kOngoingSessionPresetKey);
+      if (json == null) return;
+      final SessionPreset preset = SessionPreset.fromJson(
+        jsonDecode(json) as Map<String, dynamic>,
+      );
+      if (!mounted) return;
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) => SessionScreen(preset: preset),
+        ),
+      );
+    } catch (_) {}
   }
 
   Future<void> _loadPresets() async {
@@ -246,7 +311,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
                     ),
                     child: Center(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+                        padding: const EdgeInsets.only(left: 20, right: 20, top: 32, bottom: 36),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
@@ -334,7 +399,7 @@ class _PresetListScreenState extends State<PresetListScreen> {
                     ),
                     child: Center(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+                        padding: const EdgeInsets.only(left: 20, right: 20, top: 32, bottom: 36),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
@@ -447,79 +512,78 @@ class _PresetListScreenState extends State<PresetListScreen> {
 
     final PermissionStatus status = await Permission.notification.status;
     if (!status.isGranted) {
-      final PermissionStatus result = await Permission.notification.request();
-      if (!result.isGranted) {
-        if (!mounted) return;
-        final AppLocalizations permL10n = AppLocalizations.of(context)!;
-        await showDialog<void>(
-          context: context,
-          barrierColor: Colors.black.withOpacity(0.9),
-          builder: (BuildContext context) {
-            return Dialog(
-              backgroundColor: Colors.transparent,
-              insetPadding: EdgeInsets.zero,
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: MediaQuery.sizeOf(context).width,
-                    maxHeight: MediaQuery.sizeOf(context).height - 64,
-                  ),
-                  child: _AnimatedDialogContent(
-                    child: SingleChildScrollView(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minHeight: MediaQuery.sizeOf(context).height - 64,
-                        ),
-                        child: Center(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                Text(
-                                  permL10n.notificationPermissionMessage,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                            LayoutBuilder(
-                              builder: (BuildContext context, BoxConstraints constraints) {
-                                final spacing = constraints.maxWidth < 300 ? 16.0 : 28.0;
-                                return Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    SizedBox(height: spacing),
-                                    Wrap(
-                                      spacing: 8,
-                                      runSpacing: 0,
-                                      alignment: WrapAlignment.center,
-                                      children: <Widget>[
-                                        TextButton(
-                                          onPressed: () {
-                                            openAppSettings();
-                                            Navigator.of(context).pop();
-                                          },
-                                          style: TextButton.styleFrom(
-                                            backgroundColor: Colors.transparent,
-                                            shape: const StadiumBorder(),
+      if (!mounted) return;
+      final AppLocalizations permL10n = AppLocalizations.of(context)!;
+      final bool? notificationGranted = await showDialog<bool>(
+        context: context,
+        barrierColor: Colors.black.withOpacity(0.9),
+        builder: (BuildContext context) {
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: EdgeInsets.zero,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.sizeOf(context).width,
+                  maxHeight: MediaQuery.sizeOf(context).height - 64,
+                ),
+                child: _AnimatedDialogContent(
+                  child: SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: MediaQuery.sizeOf(context).height - 64,
+                      ),
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 48),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Text(
+                                permL10n.notificationPermissionMessage,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                              LayoutBuilder(
+                                builder: (BuildContext context, BoxConstraints constraints) {
+                                  final spacing = constraints.maxWidth < 300 ? 16.0 : 28.0;
+                                  return Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      SizedBox(height: spacing),
+                                      Wrap(
+                                        spacing: 8,
+                                        runSpacing: 0,
+                                        alignment: WrapAlignment.center,
+                                        children: <Widget>[
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop(false),
+                                            style: TextButton.styleFrom(
+                                              backgroundColor: Colors.transparent,
+                                              shape: const StadiumBorder(),
+                                            ),
+                                            child: Text(permL10n.cancel),
                                           ),
-                                          child: Text(permL10n.grant),
-                                        ),
-                                        TextButton(
-                                          onPressed: () => Navigator.of(context).pop(),
-                                          style: TextButton.styleFrom(
-                                            backgroundColor: Colors.transparent,
-                                            shape: const StadiumBorder(),
+                                          TextButton(
+                                            onPressed: () async {
+                                              final PermissionStatus result =
+                                                  await Permission.notification.request();
+                                              if (!context.mounted) return;
+                                              Navigator.of(context).pop(result.isGranted);
+                                            },
+                                            style: TextButton.styleFrom(
+                                              backgroundColor: Colors.transparent,
+                                              shape: const StadiumBorder(),
+                                            ),
+                                            child: Text(permL10n.grant),
                                           ),
-                                          child: Text(permL10n.cancel),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                              ],
-                            ),
+                                        ],
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -527,13 +591,104 @@ class _PresetListScreenState extends State<PresetListScreen> {
                   ),
                 ),
               ),
-            );
-          },
-        );
-        return;
-      }
+            ),
+          );
+        },
+      );
+      if (notificationGranted != true) return;
     }
     if (!mounted) return;
+    final bool canExactAlarms = await SessionService.canScheduleExactAlarms();
+    if (!canExactAlarms) {
+      if (!mounted) return;
+      setState(() => _pendingSessionAfterExactAlarm = effective);
+      final AppLocalizations permL10n = AppLocalizations.of(context)!;
+      await showDialog<void>(
+        context: context,
+        barrierColor: Colors.black.withOpacity(0.9),
+        builder: (BuildContext context) {
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: EdgeInsets.zero,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.sizeOf(context).width,
+                  maxHeight: MediaQuery.sizeOf(context).height - 64,
+                ),
+                child: _AnimatedDialogContent(
+                  child: SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: MediaQuery.sizeOf(context).height - 64,
+                      ),
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 48),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Text(
+                                permL10n.exactAlarmPermissionMessage,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                              LayoutBuilder(
+                                builder: (BuildContext context, BoxConstraints constraints) {
+                                  final spacing = constraints.maxWidth < 300 ? 16.0 : 28.0;
+                                  return Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      SizedBox(height: spacing),
+                                      Wrap(
+                                        spacing: 8,
+                                        runSpacing: 0,
+                                        alignment: WrapAlignment.center,
+                                        children: <Widget>[
+                                          TextButton(
+                                            onPressed: () {
+                                              setState(() => _pendingSessionAfterExactAlarm = null);
+                                              Navigator.of(context).pop();
+                                            },
+                                            style: TextButton.styleFrom(
+                                              backgroundColor: Colors.transparent,
+                                              shape: const StadiumBorder(),
+                                            ),
+                                            child: Text(permL10n.cancel),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              SessionService.openExactAlarmSettings();
+                                              Navigator.of(context).pop();
+                                            },
+                                            style: TextButton.styleFrom(
+                                              backgroundColor: Colors.transparent,
+                                              shape: const StadiumBorder(),
+                                            ),
+                                            child: Text(permL10n.grant),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+      return;
+    }
+    if (!mounted) return;
+    await _saveOngoingSessionPreset(effective);
     try {
       await SessionService.startSession(preset: effective);
     } catch (_) {
@@ -903,15 +1058,34 @@ class SessionScreen extends StatefulWidget {
   State<SessionScreen> createState() => _SessionScreenState();
 }
 
-class _SessionScreenState extends State<SessionScreen> {
+class _SessionScreenState extends State<SessionScreen>
+    with WidgetsBindingObserver {
   SessionState? _state;
   Timer? _pollTimer;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WakelockPlus.enable();
     _poll();
+    _startPolling();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      _poll();
+      _startPolling();
+    } else {
+      _pollTimer?.cancel();
+      _pollTimer = null;
+    }
+  }
+
+  void _startPolling() {
+    _pollTimer?.cancel();
     _pollTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted) return;
       _poll();
@@ -923,6 +1097,11 @@ class _SessionScreenState extends State<SessionScreen> {
     if (!mounted) return;
     if (state == null) {
       _pollTimer?.cancel();
+      _pollTimer = null;
+      try {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.remove(_kOngoingSessionPresetKey);
+      } catch (_) {}
       Navigator.of(context).pop();
       return;
     }
@@ -933,6 +1112,7 @@ class _SessionScreenState extends State<SessionScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pollTimer?.cancel();
     WakelockPlus.disable();
     super.dispose();
@@ -960,7 +1140,7 @@ class _SessionScreenState extends State<SessionScreen> {
                     ),
                     child: Center(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+                        padding: const EdgeInsets.only(left: 20, right: 20, top: 32, bottom: 36),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[

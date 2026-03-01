@@ -36,7 +36,11 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get notificationPermissionMessage =>
-      'É necessária permissão de notificação para as sessões.';
+      'Para funcionar com a tela desligada, permita Notificações';
+
+  @override
+  String get exactAlarmPermissionMessage =>
+      'Para precisão com a tela desligada, permita “Alarmes e lembretes”.';
 
   @override
   String get grant => 'Conceder';

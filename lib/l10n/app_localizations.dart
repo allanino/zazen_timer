@@ -154,6 +154,12 @@ abstract class AppLocalizations {
   /// **'Notification permission is needed for sessions.'**
   String get notificationPermissionMessage;
 
+  /// No description provided for @exactAlarmPermissionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'For precision with the screen off, allow “Alarms & reminders”.'**
+  String get exactAlarmPermissionMessage;
+
   /// No description provided for @grant.
   ///
   /// In en, this message translates to:

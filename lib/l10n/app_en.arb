@@ -16,6 +16,7 @@
   "schedule": "Schedule",
   "startTime": "Start time",
   "notificationPermissionMessage": "Notification permission is needed for sessions.",
+  "exactAlarmPermissionMessage": "For precision with the screen off, allow “Alarms & reminders”.",
   "grant": "Grant",
   "goingBackStopsSession": "Going back will stop the current session.",
   "stop": "Stop",
