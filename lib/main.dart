@@ -240,13 +240,18 @@ class _PresetListScreenState extends State<PresetListScreen> {
               ),
               child: _AnimatedDialogContent(
                 child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Text(
-                          l10n.deletePresetConfirm(preset.breakdownLabel),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.sizeOf(context).height - 64,
+                    ),
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Text(
+                              l10n.deletePresetConfirm(preset.breakdownLabel),
                           textAlign: TextAlign.center,
                           style: const TextStyle(color: Colors.white),
                         ),
@@ -285,7 +290,9 @@ class _PresetListScreenState extends State<PresetListScreen> {
                             );
                           },
                         ),
-                      ],
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -321,13 +328,18 @@ class _PresetListScreenState extends State<PresetListScreen> {
               ),
               child: _AnimatedDialogContent(
                 child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Text(
-                          l10n.startSession,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.sizeOf(context).height - 64,
+                    ),
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Text(
+                              l10n.startSession,
                           textAlign: TextAlign.center,
                           style: const TextStyle(color: Colors.white),
                         ),
@@ -365,7 +377,9 @@ class _PresetListScreenState extends State<PresetListScreen> {
                             );
                           },
                         ),
-                      ],
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -452,13 +466,18 @@ class _PresetListScreenState extends State<PresetListScreen> {
                   ),
                   child: _AnimatedDialogContent(
                     child: SingleChildScrollView(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Text(
-                              permL10n.notificationPermissionMessage,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: MediaQuery.sizeOf(context).height - 64,
+                        ),
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Text(
+                                  permL10n.notificationPermissionMessage,
                               textAlign: TextAlign.center,
                               style: const TextStyle(color: Colors.white),
                             ),
@@ -499,7 +518,9 @@ class _PresetListScreenState extends State<PresetListScreen> {
                                 );
                               },
                             ),
-                          ],
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -933,13 +954,18 @@ class _SessionScreenState extends State<SessionScreen> {
               ),
               child: _AnimatedDialogContent(
                 child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Text(
-                          AppLocalizations.of(context)!.goingBackStopsSession,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.sizeOf(context).height - 64,
+                    ),
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Text(
+                              AppLocalizations.of(context)!.goingBackStopsSession,
                           textAlign: TextAlign.center,
                           style: const TextStyle(color: Colors.white),
                         ),
@@ -977,7 +1003,9 @@ class _SessionScreenState extends State<SessionScreen> {
                             );
                           },
                         ),
-                      ],
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
