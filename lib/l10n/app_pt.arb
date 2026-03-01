@@ -25,7 +25,7 @@
   "addStep": "Adicionar etapa",
   "savePreset": "Salvar preset",
   "confirm": "Confirmar",
-  "untilStart": "Até o início",
+  "untilStart": "Até começar",
   "minutesTotal": "{count} min no total",
   "session": "Sessão",
   "presetNameWithTotal": "{breakdown} ({total} min no total)"
