@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="session_channel_name">Sesión</string>
+    <string name="session_notification_title_waiting">Esperando…</string>
+    <string name="session_notification_title_zazen">Zazen…</string>
+    <string name="session_notification_title_kinhin">Kinhin…</string>
+    <string name="session_notification_tap_to_open">Sesión en curso</string>
+</resources>
