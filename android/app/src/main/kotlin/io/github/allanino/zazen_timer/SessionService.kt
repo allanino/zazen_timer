@@ -318,7 +318,7 @@ class SessionService : Service() {
   private data class StepSpec(val type: String, val durationMs: Long)
 
   companion object {
-    private const val SOFT_VIBRATION_AMPLITUDE = 128
+    private const val SOFT_VIBRATION_AMPLITUDE = 64
     private const val CHANNEL_ID = "zazen_session"
     private const val NOTIFICATION_ID = 1
     const val EXTRA_SESSION = "session"
