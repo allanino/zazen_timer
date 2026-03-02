@@ -212,21 +212,21 @@ class SessionService : Service() {
   }
 
   private fun vibrateThreeMedium() {
-    vibratePattern(longArrayOf(0, 100, 200, 100, 200, 100))
+    vibratePattern(longArrayOf(0, 220, 420, 220, 460, 280))
   }
 
   private fun vibrateTwoMedium() {
-    vibratePattern(longArrayOf(0, 100, 200, 100))
+    vibratePattern(longArrayOf(0, 220, 460, 280))
   }
 
   private fun vibrateOneLong() {
     val v = getVibrator() ?: return
     if (!v.hasVibrator()) return
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      v.vibrate(VibrationEffect.createOneShot(300, VibrationEffect.DEFAULT_AMPLITUDE))
+      v.vibrate(VibrationEffect.createOneShot(500, SOFT_VIBRATION_AMPLITUDE))
     } else {
       @Suppress("DEPRECATION")
-      v.vibrate(300)
+      v.vibrate(500)
     }
   }
 
@@ -234,7 +234,14 @@ class SessionService : Service() {
     val v = getVibrator() ?: return
     if (!v.hasVibrator() || pattern.isEmpty()) return
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      v.vibrate(VibrationEffect.createWaveform(pattern, -1))
+      val amplitudes = IntArray(pattern.size) { index ->
+        when {
+          index == 0 -> 0 // initial delay
+          index % 2 == 1 -> SOFT_VIBRATION_AMPLITUDE // vibration segment
+          else -> 0 // gap segment
+        }
+      }
+      v.vibrate(VibrationEffect.createWaveform(pattern, amplitudes, -1))
     } else {
       @Suppress("DEPRECATION")
       v.vibrate(pattern, -1)
@@ -311,6 +318,7 @@ class SessionService : Service() {
   private data class StepSpec(val type: String, val durationMs: Long)
 
   companion object {
+    private const val SOFT_VIBRATION_AMPLITUDE = 128
     private const val CHANNEL_ID = "zazen_session"
     private const val NOTIFICATION_ID = 1
     const val EXTRA_SESSION = "session"
