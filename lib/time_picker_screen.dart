@@ -243,7 +243,7 @@ class _TimePickerScreenState extends State<TimePickerScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(bottom: 24),
+              padding: const EdgeInsets.only(bottom: 30),
               child: Center(
                 child: SizedBox(
                   height: 22,
