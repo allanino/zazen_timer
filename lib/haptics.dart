@@ -24,12 +24,12 @@ class Haptics {
 
   /// Three medium vibrations – used at zazen start and kinhin -> zazen.
   static Future<void> threeMedium() async {
-    await _pattern(<int>[0, 220, 380, 220, 420, 280]);
+    await _pattern(<int>[0, 220, 420, 220, 460, 280]);
   }
 
   /// Two medium vibrations – used at zazen -> kinhin.
   static Future<void> twoMedium() async {
-    await _pattern(<int>[0, 220, 420, 280]);
+    await _pattern(<int>[0, 220, 460, 280]);
   }
 
   /// One long vibration – used at session end.
