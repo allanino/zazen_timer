@@ -293,8 +293,21 @@ class _PresetListScreenState extends State<PresetListScreen>
 
     if (choice == 'time') {
       final DateTime now = DateTime.now();
+      // Round up to the next full minute (e.g. 15:03:32 -> 15:04:00).
+      final int initialMinute = (now.second == 0 &&
+              now.millisecond == 0 &&
+              now.microsecond == 0)
+          ? now.minute
+          : now.minute + 1;
+      final DateTime rounded = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        now.hour,
+        initialMinute,
+      );
       final TimeOfDay initial =
-          TimeOfDay(hour: now.hour, minute: now.minute);
+          TimeOfDay(hour: rounded.hour, minute: rounded.minute);
       final (int, int, int)? result =
           await Navigator.of(context).push<(int, int, int)>(
         MaterialPageRoute<(int, int, int)>(
