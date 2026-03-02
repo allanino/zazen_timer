@@ -238,28 +238,37 @@ class _PresetListScreenState extends State<PresetListScreen>
                                   mainAxisSize: MainAxisSize.min,
                                   children: <Widget>[
                                     SizedBox(height: spacing),
-                                    Wrap(
-                                      spacing: 8,
-                                      runSpacing: 0,
-                                      alignment: WrapAlignment.center,
-                                      children: <Widget>[
-                                        TextButton(
-                                          onPressed: () => Navigator.of(context).pop('now'),
-                                          style: TextButton.styleFrom(
-                                            backgroundColor: Colors.transparent,
-                                            shape: const StadiumBorder(),
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop('now'),
+                                            style: TextButton.styleFrom(
+                                              backgroundColor: Colors.transparent,
+                                              shape: const StadiumBorder(),
+                                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                              minimumSize: Size.zero,
+                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                            ),
+                                            child: Text(l10n.now),
                                           ),
-                                          child: Text(l10n.now),
-                                        ),
-                                        TextButton(
-                                          onPressed: () => Navigator.of(context).pop('time'),
-                                          style: TextButton.styleFrom(
-                                            backgroundColor: Colors.transparent,
-                                            shape: const StadiumBorder(),
+                                          const SizedBox(width: 8),
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop('time'),
+                                            style: TextButton.styleFrom(
+                                              backgroundColor: Colors.transparent,
+                                              shape: const StadiumBorder(),
+                                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                              minimumSize: Size.zero,
+                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                            ),
+                                            child: Text(l10n.schedule),
                                           ),
-                                          child: Text(l10n.schedule, softWrap: false),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 );
@@ -472,29 +481,38 @@ class _PresetListScreenState extends State<PresetListScreen>
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
                                 SizedBox(height: spacing),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 0,
-                                  alignment: WrapAlignment.center,
-                                  children: <Widget>[
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop(false),
-                                      style: TextButton.styleFrom(
-                                        backgroundColor: Colors.transparent,
-                                        shape: const StadiumBorder(),
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(false),
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          shape: const StadiumBorder(),
+                                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                          minimumSize: Size.zero,
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                        ),
+                                        child: Text(l10n.cancel),
                                       ),
-                                      child: Text(l10n.cancel),
-                                    ),
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop(true),
-                                      style: TextButton.styleFrom(
-                                        backgroundColor: Colors.transparent,
-                                        foregroundColor: kDeleteColor,
-                                        shape: const StadiumBorder(),
+                                      const SizedBox(width: 8),
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(true),
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          foregroundColor: kDeleteColor,
+                                          shape: const StadiumBorder(),
+                                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                          minimumSize: Size.zero,
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                        ),
+                                        child: Text(l10n.delete),
                                       ),
-                                      child: Text(l10n.delete),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ],
                             );
@@ -564,33 +582,42 @@ class _PresetListScreenState extends State<PresetListScreen>
                                     mainAxisSize: MainAxisSize.min,
                                     children: <Widget>[
                                       SizedBox(height: spacing),
-                                      Wrap(
-                                        spacing: 8,
-                                        runSpacing: 0,
-                                        alignment: WrapAlignment.center,
-                                        children: <Widget>[
-                                          TextButton(
-                                            onPressed: () => Navigator.of(context).pop(false),
-                                            style: TextButton.styleFrom(
-                                              backgroundColor: Colors.transparent,
-                                              shape: const StadiumBorder(),
+                                      FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            TextButton(
+                                              onPressed: () => Navigator.of(context).pop(false),
+                                              style: TextButton.styleFrom(
+                                                backgroundColor: Colors.transparent,
+                                                shape: const StadiumBorder(),
+                                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                                minimumSize: Size.zero,
+                                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                              ),
+                                              child: Text(permL10n.cancel),
                                             ),
-                                            child: Text(permL10n.cancel),
-                                          ),
-                                          TextButton(
-                                            onPressed: () async {
-                                              final PermissionStatus result =
-                                                  await Permission.notification.request();
-                                              if (!context.mounted) return;
-                                              Navigator.of(context).pop(result.isGranted);
-                                            },
-                                            style: TextButton.styleFrom(
-                                              backgroundColor: Colors.transparent,
-                                              shape: const StadiumBorder(),
+                                            const SizedBox(width: 8),
+                                            TextButton(
+                                              onPressed: () async {
+                                                final PermissionStatus result =
+                                                    await Permission.notification.request();
+                                                if (!context.mounted) return;
+                                                Navigator.of(context).pop(result.isGranted);
+                                              },
+                                              style: TextButton.styleFrom(
+                                                backgroundColor: Colors.transparent,
+                                                shape: const StadiumBorder(),
+                                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                                minimumSize: Size.zero,
+                                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                              ),
+                                              child: Text(permL10n.grant),
                                             ),
-                                            child: Text(permL10n.grant),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ],
                                   );
@@ -654,34 +681,43 @@ class _PresetListScreenState extends State<PresetListScreen>
                                     mainAxisSize: MainAxisSize.min,
                                     children: <Widget>[
                                       SizedBox(height: spacing),
-                                      Wrap(
-                                        spacing: 8,
-                                        runSpacing: 0,
-                                        alignment: WrapAlignment.center,
-                                        children: <Widget>[
-                                          TextButton(
-                                            onPressed: () {
-                                              setState(() => _pendingPresetAfterExactAlarm = null);
-                                              Navigator.of(context).pop();
-                                            },
-                                            style: TextButton.styleFrom(
-                                              backgroundColor: Colors.transparent,
-                                              shape: const StadiumBorder(),
+                                      FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            TextButton(
+                                              onPressed: () {
+                                                setState(() => _pendingPresetAfterExactAlarm = null);
+                                                Navigator.of(context).pop();
+                                              },
+                                              style: TextButton.styleFrom(
+                                                backgroundColor: Colors.transparent,
+                                                shape: const StadiumBorder(),
+                                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                                minimumSize: Size.zero,
+                                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                              ),
+                                              child: Text(permL10n.cancel),
                                             ),
-                                            child: Text(permL10n.cancel),
-                                          ),
-                                          TextButton(
-                                            onPressed: () {
-                                              SessionService.openExactAlarmSettings();
-                                              Navigator.of(context).pop();
-                                            },
-                                            style: TextButton.styleFrom(
-                                              backgroundColor: Colors.transparent,
-                                              shape: const StadiumBorder(),
+                                            const SizedBox(width: 8),
+                                            TextButton(
+                                              onPressed: () {
+                                                SessionService.openExactAlarmSettings();
+                                                Navigator.of(context).pop();
+                                              },
+                                              style: TextButton.styleFrom(
+                                                backgroundColor: Colors.transparent,
+                                                shape: const StadiumBorder(),
+                                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                                minimumSize: Size.zero,
+                                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                              ),
+                                              child: Text(permL10n.grant),
                                             ),
-                                            child: Text(permL10n.grant),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ],
                                   );
@@ -1173,28 +1209,37 @@ class _SessionScreenState extends State<SessionScreen>
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
                                 SizedBox(height: spacing),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 0,
-                                  alignment: WrapAlignment.center,
-                                  children: <Widget>[
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop(false),
-                                      style: TextButton.styleFrom(
-                                        backgroundColor: Colors.transparent,
-                                        shape: const StadiumBorder(),
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(false),
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          shape: const StadiumBorder(),
+                                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                          minimumSize: Size.zero,
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                        ),
+                                        child: Text(AppLocalizations.of(context)!.cancel),
                                       ),
-                                      child: Text(AppLocalizations.of(context)!.cancel),
-                                    ),
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop(true),
-                                      style: TextButton.styleFrom(
-                                        backgroundColor: Colors.transparent,
-                                        shape: const StadiumBorder(),
+                                      const SizedBox(width: 8),
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(true),
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          shape: const StadiumBorder(),
+                                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                          minimumSize: Size.zero,
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                        ),
+                                        child: Text(AppLocalizations.of(context)!.stop),
                                       ),
-                                      child: Text(AppLocalizations.of(context)!.stop),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ],
                             );
