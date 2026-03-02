@@ -930,9 +930,22 @@ class _PresetListItemState extends State<_PresetListItem> {
                     ),
                   )
                 ),
-                Container(
+                SizedBox(
                   width: 2,
-                  color: const Color.fromARGB(255, 30, 34, 40), // slightly darker than card
+                  child: LayoutBuilder(
+                    builder: (BuildContext context, BoxConstraints constraints) {
+                      final double h = constraints.maxHeight * 0.8;
+                      return Container(
+                        color: const Color(0xFF262B32), // same as pill background
+                        alignment: Alignment.center,
+                        child: Container(
+                          width: 1,
+                          height: h,
+                          color: const Color.fromARGB(255, 30, 34, 40),
+                        ),
+                      );
+                    },
+                  ),
                 ),
                 Expanded(
                   child: Semantics(
