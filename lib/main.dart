@@ -428,6 +428,16 @@ class _PresetListScreenState extends State<PresetListScreen>
         SessionStep(type: StepType.zazen, duration: Duration(minutes: 20)),
       ],
     ),
+    SessionPreset(
+      id: 'long-default',
+      name: 'Long',
+      steps: <SessionStep>[
+        SessionStep(type: StepType.preStart, duration: Duration(minutes: 1)),
+        SessionStep(type: StepType.zazen, duration: Duration(minutes: 40)),
+        SessionStep(type: StepType.kinhin, duration: Duration(minutes: 10)),
+        SessionStep(type: StepType.zazen, duration: Duration(minutes: 40)),
+      ],
+    ),
   ];
 
   Future<void> _createPreset() async {
@@ -583,12 +593,8 @@ class _PresetListScreenState extends State<PresetListScreen>
               if (contentIndex < _presets.length) {
                 final SessionPreset preset = _presets[contentIndex];
                 final double width = MediaQuery.sizeOf(context).width;
-                final bool usePhoneLayout = width > _kPhoneBreakpoint;
-                final double listHorizontalPadding = usePhoneLayout ? 0 : 56;
-                final double cardWidth =
-                    (width - listHorizontalPadding).clamp(0.0, double.infinity);
                 final Widget card = SizedBox(
-                  width: cardWidth,
+                  width: width,
                   child: _PresetListItem(
                     key: ValueKey<String>(preset.id),
                     preset: preset,
