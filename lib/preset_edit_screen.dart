@@ -136,110 +136,122 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.only(top: 42, bottom: 12),
                 children: <Widget>[
-            ..._steps.asMap().entries.map((MapEntry<int, _EditableStep> entry) {
-              final int index = entry.key;
-              final _EditableStep step = entry.value;
-              return Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 2,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          Expanded(
-                            child: DropdownButton<StepType>(
-                              isExpanded: true,
-                              value: step.type,
-                              underline: const SizedBox.shrink(),
-                              items: StepType.values
-                                  .map(
-                                    (StepType t) =>
-                                        DropdownMenuItem<StepType>(
-                                      value: t,
-                                      child: Text(
-                                        stepTypeDropdownLabel(
-                                            t, AppLocalizations.of(context)!),
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (StepType? value) {
-                                if (value == null) return;
-                                setState(() {
-                                  step.type = value;
-                                });
-                              },
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () => _removeStep(index),
-                          ),
-                        ],
+                  ..._steps.asMap().entries.map((MapEntry<int, _EditableStep> entry) {
+                    final int index = entry.key;
+                    final _EditableStep step = entry.value;
+                    return Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: <Widget>[
-                          Text(AppLocalizations.of(context)!.duration),
-                          const SizedBox(width: 8),
-                          TextButton(
-                            onPressed: () async {
-                              final (int, int, int)? result =
-                                  await Navigator.of(context).push<(int, int, int)>(
-                                MaterialPageRoute<(int, int, int)>(
-                                  builder: (BuildContext context) =>
-                                      TimePickerScreen(
-                                    title: AppLocalizations.of(context)!.setDuration,
-                                    initialHour: step.totalSeconds ~/ 3600,
-                                    initialMinute: (step.totalSeconds % 3600) ~/ 60,
-                                    initialSecond: step.totalSeconds % 60,
+                      elevation: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Row(
+                              children: <Widget>[
+                                Expanded(
+                                  child: DropdownButton<StepType>(
+                                    isExpanded: true,
+                                    value: step.type,
+                                    underline: const SizedBox.shrink(),
+                                    items: StepType.values
+                                        .map(
+                                          (StepType t) =>
+                                              DropdownMenuItem<StepType>(
+                                            value: t,
+                                            child: Text(
+                                              stepTypeDropdownLabel(
+                                                  t, AppLocalizations.of(context)!),
+                                            ),
+                                          ),
+                                        )
+                                        .toList(),
+                                    onChanged: (StepType? value) {
+                                      if (value == null) return;
+                                      setState(() {
+                                        step.type = value;
+                                      });
+                                    },
                                   ),
                                 ),
-                              );
-                              if (result != null) {
-                                setState(() {
-                                  step.totalSeconds =
-                                      result.$1 * 3600 + result.$2 * 60 + result.$3;
-                                });
-                              }
-                            },
-                            child: Text(
-                              step.durationLabel,
-                              style: const TextStyle(fontSize: 16),
+                                IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () => _removeStep(index),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 4),
+                            Row(
+                              children: <Widget>[
+                                Text(AppLocalizations.of(context)!.duration),
+                                const SizedBox(width: 8),
+                                TextButton(
+                                  onPressed: () async {
+                                    final (int, int, int)? result =
+                                        await Navigator.of(context).push<(int, int, int)>(
+                                      MaterialPageRoute<(int, int, int)>(
+                                        builder: (BuildContext context) =>
+                                            TimePickerScreen(
+                                          title: AppLocalizations.of(context)!.setDuration,
+                                          initialHour: step.totalSeconds ~/ 3600,
+                                          initialMinute: (step.totalSeconds % 3600) ~/ 60,
+                                          initialSecond: step.totalSeconds % 60,
+                                        ),
+                                      ),
+                                    );
+                                    if (result != null) {
+                                      setState(() {
+                                        step.totalSeconds =
+                                            result.$1 * 3600 + result.$2 * 60 + result.$3;
+                                      });
+                                    }
+                                  },
+                                  child: Text(
+                                    step.durationLabel,
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
+                    );
+                  }),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: SizedBox(
+                      height: 44,
+                      child: ElevatedButton.icon(
+                        onPressed: _addStep,
+                        icon: const Icon(Icons.add),
+                        label: Text(AppLocalizations.of(context)!.addStep),
+                        style: ElevatedButton.styleFrom(
+                          shape: const StadiumBorder(),
+                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              );
-            }),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _addStep,
-                icon: const Icon(Icons.add),
-                label: Text(AppLocalizations.of(context)!.addStep),
-              ),
-            ),
-            const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: _save,
-                      icon: const Icon(Icons.check),
-                      label: Text(AppLocalizations.of(context)!.savePreset),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: SizedBox(
+                      height: 44,
+                      child: ElevatedButton.icon(
+                        onPressed: _save,
+                        icon: const Icon(Icons.check),
+                        label: Text(AppLocalizations.of(context)!.savePreset),
+                        style: ElevatedButton.styleFrom(
+                          shape: const StadiumBorder(),
+                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        ),
+                      ),
                     ),
                   ),
                 ],
