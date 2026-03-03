@@ -20,6 +20,12 @@ class CircularTimer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.sizeOf(context);
+    const double kPhoneBreakpoint = 360;
+    const double baseStrokeWidth = 12.0;
+    final bool isPhone = size.width > kPhoneBreakpoint;
+    final double strokeWidth = isPhone ? baseStrokeWidth * 1.25 : baseStrokeWidth;
+
     final double fraction =
         total.inMilliseconds == 0 ? 0.0 : remaining.inMilliseconds / total.inMilliseconds;
     final int totalSeconds = (remaining.inMilliseconds / 1000).round();
@@ -32,7 +38,10 @@ class CircularTimer extends StatelessWidget {
     return AspectRatio(
       aspectRatio: 1,
       child: CustomPaint(
-        painter: _RingPainter(fraction: fraction),
+        painter: _RingPainter(
+          fraction: fraction,
+          strokeWidth: strokeWidth,
+        ),
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -63,12 +72,15 @@ class CircularTimer extends StatelessWidget {
 
 class _RingPainter extends CustomPainter {
   final double fraction;
+  final double strokeWidth;
 
-  _RingPainter({required this.fraction});
+  _RingPainter({
+    required this.fraction,
+    required this.strokeWidth,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
-    const double strokeWidth = 12.0;
     const double radiusPadding = 8.0;
     const Color baseColor = Color.fromARGB(255, 85, 89, 92);
     const Color brighterColor = Color(0xFF989DA3);
@@ -167,6 +179,6 @@ class _RingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _RingPainter oldDelegate) =>
-      oldDelegate.fraction != fraction;
+      oldDelegate.fraction != fraction || oldDelegate.strokeWidth != strokeWidth;
 }
 

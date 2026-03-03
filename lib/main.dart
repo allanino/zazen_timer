@@ -1327,15 +1327,17 @@ class _SessionScreenState extends State<SessionScreen>
               total: _state!.stepTotal,
               step: _state!.toSessionStep(),
             );
-            return Center(
-              child: Padding(
-                padding: EdgeInsets.all(padding),
-                child: usePhoneLayout
-                    ? ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: _kPhoneMaxContentWidth),
-                        child: timer,
-                      )
-                    : timer,
+            return SafeArea(
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.all(padding),
+                  child: usePhoneLayout
+                      ? ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: _kPhoneMaxContentWidth),
+                          child: timer,
+                        )
+                      : timer,
+                ),
               ),
             );
           },
