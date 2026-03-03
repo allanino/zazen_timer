@@ -93,8 +93,10 @@ class _TimePickerScreenState extends State<TimePickerScreen> {
   Widget build(BuildContext context) {
     final Size size = MediaQuery.sizeOf(context);
     final bool isPhone = size.width > _kPhoneBreakpoint;
-    final double topPadding = isPhone ? size.height * 0.3 : 24;
-    final double bottomPadding = isPhone ? size.height * 0.3 : 30;
+    final double topPadding = isPhone ? size.height * 0.26 : 24;
+    final double bottomPadding = isPhone ? size.height * 0.26 : 30;
+    final double wheelsTopPadding = isPhone ? 16 : 0;
+    final double wheelsBottomPadding = isPhone ? 28 : 12;
     final double selectedFontSize = isPhone ? 30 : 28;
     final double unselectedFontSize = isPhone ? 22 : 20;
 
@@ -115,7 +117,7 @@ class _TimePickerScreenState extends State<TimePickerScreen> {
             const SizedBox(height: 6),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(32, 0, 32, 12),
+                padding: EdgeInsets.fromLTRB(32, wheelsTopPadding, 32, wheelsBottomPadding),
                 child: Row(
                   children: <Widget>[
                     Expanded(
