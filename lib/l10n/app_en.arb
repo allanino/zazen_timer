@@ -18,7 +18,7 @@
   "notificationPermissionMessage": "Notification permission is needed for sessions.",
   "exactAlarmPermissionMessage": "For precision with the screen off, allow “Alarms & reminders”.",
   "grant": "Grant",
-  "goingBackStopsSession": "Going back will stop the current session.",
+  "goingBackStopsSession": "Stop current session?",
   "stop": "Stop",
   "tapCardToStartSession": "Tap card to start session",
   "newPreset": "New preset",

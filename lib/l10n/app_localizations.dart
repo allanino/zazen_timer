@@ -169,7 +169,7 @@ abstract class AppLocalizations {
   /// No description provided for @goingBackStopsSession.
   ///
   /// In en, this message translates to:
-  /// **'Going back will stop the current session.'**
+  /// **'Stop current session?'**
   String get goingBackStopsSession;
 
   /// No description provided for @stop.

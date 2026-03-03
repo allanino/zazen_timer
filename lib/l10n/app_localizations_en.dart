@@ -46,8 +46,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get grant => 'Grant';
 
   @override
-  String get goingBackStopsSession =>
-      'Going back will stop the current session.';
+  String get goingBackStopsSession => 'Stop current session?';
 
   @override
   String get stop => 'Stop';

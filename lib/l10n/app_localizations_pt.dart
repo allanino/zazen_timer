@@ -46,7 +46,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get grant => 'Conceder';
 
   @override
-  String get goingBackStopsSession => 'Voltar encerrará a sessão atual.';
+  String get goingBackStopsSession => 'Encerrar a sessão atual?';
 
   @override
   String get stop => 'Encerrar';

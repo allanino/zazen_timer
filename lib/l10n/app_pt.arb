@@ -11,7 +11,7 @@
   "notificationPermissionMessage": "Para funcionar com a tela desligada, permita Notificações",
   "exactAlarmPermissionMessage": "Para precisão com a tela desligada, permita “Alarmes e lembretes”.",
   "grant": "Conceder",
-  "goingBackStopsSession": "Voltar encerrará a sessão atual.",
+  "goingBackStopsSession": "Encerrar a sessão atual?",
   "stop": "Encerrar",
   "tapCardToStartSession": "Toque no cartão para iniciar a sessão",
   "newPreset": "Novo preset",

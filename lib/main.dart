@@ -1345,15 +1345,20 @@ class _SessionScreenState extends State<SessionScreen>
               step: _state!.toSessionStep(),
             );
             return SafeArea(
-              child: Center(
-                child: Padding(
-                  padding: EdgeInsets.all(padding),
-                  child: usePhoneLayout
-                      ? ConstrainedBox(
-                          constraints: BoxConstraints(maxWidth: _kPhoneMaxContentWidth),
-                          child: timer,
-                        )
-                      : timer,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: usePhoneLayout ? () => _onBackPressed() : null,
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(padding),
+                    child: usePhoneLayout
+                        ? ConstrainedBox(
+                            constraints:
+                                BoxConstraints(maxWidth: _kPhoneMaxContentWidth),
+                            child: timer,
+                          )
+                        : timer,
+                  ),
                 ),
               ),
             );
