@@ -15,6 +15,7 @@ import 'preset_edit_screen.dart';
 import 'preset_store.dart';
 import 'time_picker_screen.dart';
 import 'widgets/circular_timer.dart';
+import 'widgets/zazen_top_bar.dart';
 
 /// SharedPreferences key for the preset of the currently running session (restore SessionScreen when app is reopened).
 const String _kOngoingSessionPresetKey = 'ongoing_session_preset';
@@ -558,6 +559,8 @@ class _PresetListScreenState extends State<PresetListScreen>
   }
 
   Widget _buildPresetListContent() {
+    final double width = MediaQuery.sizeOf(context).width;
+    final bool usePhoneLayout = width > _kPhoneBreakpoint;
     return Column(
       children: <Widget>[
         const SizedBox(height: 8),
@@ -565,9 +568,9 @@ class _PresetListScreenState extends State<PresetListScreen>
           child: ListView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.fromLTRB(
-              28,
-              24,
-              28,
+              usePhoneLayout ? 0 : 28,
+              usePhoneLayout ? 0 : 24,
+              usePhoneLayout ? 0 : 28,
               MediaQuery.of(context).padding.bottom + 12.0,
             ),
             itemCount: (_presets.length <= 2 ? 1 : 0) + _presets.length + 1,
@@ -579,8 +582,11 @@ class _PresetListScreenState extends State<PresetListScreen>
               final int contentIndex = index - (hasLeadingSpacer ? 1 : 0);
               if (contentIndex < _presets.length) {
                 final SessionPreset preset = _presets[contentIndex];
-                const double listHorizontalPadding = 56;
-                final double cardWidth = (MediaQuery.sizeOf(context).width - listHorizontalPadding).clamp(0.0, double.infinity);
+                final double width = MediaQuery.sizeOf(context).width;
+                final bool usePhoneLayout = width > _kPhoneBreakpoint;
+                final double listHorizontalPadding = usePhoneLayout ? 0 : 56;
+                final double cardWidth =
+                    (width - listHorizontalPadding).clamp(0.0, double.infinity);
                 final Widget card = SizedBox(
                   width: cardWidth,
                   child: _PresetListItem(
@@ -618,7 +624,7 @@ class _PresetListScreenState extends State<PresetListScreen>
                 );
               }
               return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                padding: const EdgeInsets.only(top: 0.0, bottom: 12.0),
                 child: Center(
                   child: SizedBox(
                     height: 44,
@@ -861,18 +867,24 @@ class _PresetListScreenState extends State<PresetListScreen>
     return Scaffold(
       body: SafeArea(
         child: usePhoneLayout
-            ? Center(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: _kPhoneMaxContentWidth),
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      top: 32,
-                      left: _kPhoneHorizontalPadding,
-                      right: _kPhoneHorizontalPadding,
+            ? Column(
+                children: <Widget>[
+                  const SizedBox(height: 12),
+                  const ZazenTopBar(),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints:
+                            BoxConstraints(maxWidth: _kPhoneMaxContentWidth),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: listContent,
+                        ),
+                      ),
                     ),
-                    child: listContent,
                   ),
-                ),
+                ],
               )
             : listContent,
       ),
@@ -969,6 +981,11 @@ class _PresetListItemState extends State<_PresetListItem> {
 
   @override
   Widget build(BuildContext context) {
+    final double width = MediaQuery.sizeOf(context).width;
+    final bool usePhoneLayout = width > _kPhoneBreakpoint;
+    final double titleFontSize = usePhoneLayout ? 18 : 16;
+    final double verticalPadding = usePhoneLayout ? 18 : 14;
+
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onHorizontalDragStart: _handleHorizontalDragStart,
@@ -1063,9 +1080,9 @@ class _PresetListItemState extends State<_PresetListItem> {
                 onTap: _handleTap,
                 borderRadius: BorderRadius.circular(16),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                     horizontal: 16,
-                    vertical: 14,
+                    vertical: verticalPadding,
                   ),
                   child: Row(
                     children: <Widget>[
@@ -1076,10 +1093,10 @@ class _PresetListItemState extends State<_PresetListItem> {
                           children: <Widget>[
                             Text(
                               widget.preset.breakdownLabel,
-                              style: const TextStyle(
-                                fontSize: 16,
+                              style: TextStyle(
+                                fontSize: titleFontSize,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFFEEEEEE),
+                                color: const Color(0xFFEEEEEE),
                               ),
                             ),
                             const SizedBox(height: 4),

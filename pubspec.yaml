@@ -31,6 +31,7 @@ flutter:
 
   assets:
     - assets/images/logo_v2.png
+    - assets/images/logo_transparent.png
 
 flutter_launcher_icons:
   android: true
