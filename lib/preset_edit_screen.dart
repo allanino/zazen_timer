@@ -139,7 +139,7 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 8,
-                vertical: 4,
+                vertical: 2,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -179,7 +179,7 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   Row(
                     children: <Widget>[
                       Text(AppLocalizations.of(context)!.duration),
