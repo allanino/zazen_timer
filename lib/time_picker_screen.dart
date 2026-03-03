@@ -31,6 +31,7 @@ class _TimePickerScreenState extends State<TimePickerScreen> {
   static const int _minuteCount = 60;
   static const int _secondCount = 60;
   static const int _loopMultiplier = 1000;
+  static const double _kPhoneBreakpoint = 360;
   late final List<Widget> _hourWidgets;
   late final List<Widget> _minuteWidgets;
   late final List<Widget> _secondWidgets;
@@ -90,12 +91,19 @@ class _TimePickerScreenState extends State<TimePickerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.sizeOf(context);
+    final bool isPhone = size.width > _kPhoneBreakpoint;
+    final double topPadding = isPhone ? size.height * 0.25 : 24;
+    final double bottomPadding = isPhone ? size.height * 0.25 : 30;
+    final double selectedFontSize = isPhone ? 30 : 28;
+    final double unselectedFontSize = isPhone ? 22 : 20;
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
         child: Column(
           children: <Widget>[
-            const SizedBox(height: 24),
+            SizedBox(height: topPadding),
             Text(
               widget.title,
               textAlign: TextAlign.center,
@@ -128,7 +136,8 @@ class _TimePickerScreenState extends State<TimePickerScreen> {
                               final Color color = isSelected
                                   ? Theme.of(context).colorScheme.primary
                                   : Colors.white70;
-                              final double fontSize = isSelected ? 28 : 20;
+                              final double fontSize =
+                                  isSelected ? selectedFontSize : unselectedFontSize;
                               return Center(
                                 child: Text(
                                   value.toString().padLeft(2, '0'),
@@ -175,7 +184,8 @@ class _TimePickerScreenState extends State<TimePickerScreen> {
                               final Color color = isSelected
                                   ? Theme.of(context).colorScheme.primary
                                   : Colors.white70;
-                              final double fontSize = isSelected ? 28 : 20;
+                              final double fontSize =
+                                  isSelected ? selectedFontSize : unselectedFontSize;
                               return Center(
                                 child: Text(
                                   value.toString().padLeft(2, '0'),
@@ -222,7 +232,8 @@ class _TimePickerScreenState extends State<TimePickerScreen> {
                               final Color color = isSelected
                                   ? Theme.of(context).colorScheme.primary
                                   : Colors.white70;
-                              final double fontSize = isSelected ? 28 : 20;
+                              final double fontSize =
+                                  isSelected ? selectedFontSize : unselectedFontSize;
                               return Center(
                                 child: Text(
                                   value.toString().padLeft(2, '0'),
@@ -243,7 +254,7 @@ class _TimePickerScreenState extends State<TimePickerScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(bottom: 30),
+              padding: EdgeInsets.only(bottom: bottomPadding),
               child: Center(
                 child: SizedBox(
                   height: 22,
