@@ -955,6 +955,12 @@ class _PresetListItemState extends State<_PresetListItem> {
     });
   }
 
+  void _handleLongPress() {
+    setState(() {
+      _dragOffset = -_maxReveal;
+    });
+  }
+
   void _handleTap() {
     if (_dragOffset != 0) {
       setState(() {
@@ -991,6 +997,7 @@ class _PresetListItemState extends State<_PresetListItem> {
       onHorizontalDragStart: _handleHorizontalDragStart,
       onHorizontalDragUpdate: _handleHorizontalDragUpdate,
       onHorizontalDragEnd: _handleHorizontalDragEnd,
+      onLongPress: _handleLongPress,
       onTap: _handleTap,
       child: Stack(
         clipBehavior: Clip.none,
