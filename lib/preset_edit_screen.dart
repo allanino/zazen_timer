@@ -111,8 +111,15 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
     Navigator.of(context).pop<SessionPreset>(preset);
   }
 
+  static const double _kPhoneBreakpoint = 360;
+
   @override
   Widget build(BuildContext context) {
+    final double width = MediaQuery.sizeOf(context).width;
+    final bool usePhoneLayout = width > _kPhoneBreakpoint;
+    // Match preset list total top: 32 + 8 + 24 = 64; editor has ListView top 42, so outer top = 22
+    final double topPadding = usePhoneLayout ? 22 : 8;
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -121,7 +128,7 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
             child: Padding(
               padding: EdgeInsets.fromLTRB(
                 8,
-                8,
+                topPadding,
                 8,
                 8 + MediaQuery.of(context).viewInsets.bottom,
               ),

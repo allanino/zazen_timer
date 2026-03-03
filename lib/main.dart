@@ -19,6 +19,11 @@ import 'widgets/circular_timer.dart';
 /// SharedPreferences key for the preset of the currently running session (restore SessionScreen when app is reopened).
 const String _kOngoingSessionPresetKey = 'ongoing_session_preset';
 
+/// Breakpoint above which we use phone-style centered layout with padding.
+const double _kPhoneBreakpoint = 360;
+const double _kPhoneMaxContentWidth = 400;
+const double _kPhoneHorizontalPadding = 32;
+
 /// Wraps dialog content with a short entrance animation: fade + scale 0.95 → 1.0.
 class _AnimatedDialogContent extends StatelessWidget {
   const _AnimatedDialogContent({required this.child});
@@ -552,6 +557,90 @@ class _PresetListScreenState extends State<PresetListScreen>
     }
   }
 
+  Widget _buildPresetListContent() {
+    return Column(
+      children: <Widget>[
+        const SizedBox(height: 8),
+        Expanded(
+          child: ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(
+              28,
+              24,
+              28,
+              MediaQuery.of(context).padding.bottom + 12.0,
+            ),
+            itemCount: (_presets.length <= 2 ? 1 : 0) + _presets.length + 1,
+            itemBuilder: (BuildContext context, int index) {
+              final bool hasLeadingSpacer = _presets.length <= 2;
+              if (hasLeadingSpacer && index == 0) {
+                return const SizedBox(height: 8);
+              }
+              final int contentIndex = index - (hasLeadingSpacer ? 1 : 0);
+              if (contentIndex < _presets.length) {
+                final SessionPreset preset = _presets[contentIndex];
+                const double listHorizontalPadding = 56;
+                final double cardWidth = (MediaQuery.sizeOf(context).width - listHorizontalPadding).clamp(0.0, double.infinity);
+                final Widget card = SizedBox(
+                  width: cardWidth,
+                  child: _PresetListItem(
+                    key: ValueKey<String>(preset.id),
+                    preset: preset,
+                    onStart: () => _startPreset(preset),
+                    onEdit: () => _editPreset(preset),
+                    onDelete: () => _deletePreset(preset),
+                  ),
+                );
+                final bool showTapHint =
+                    contentIndex == 0 && !_hasStartedSession;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: showTapHint
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: Text(
+                                AppLocalizations.of(context)!.tapCardToStartSession,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade500,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            card,
+                          ],
+                        )
+                      : card,
+                );
+              }
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                child: Center(
+                  child: SizedBox(
+                    height: 44,
+                    child: ElevatedButton.icon(
+                      onPressed: _createPreset,
+                      icon: const Icon(Icons.add),
+                      label: Text(AppLocalizations.of(context)!.newPreset),
+                      style: ElevatedButton.styleFrom(
+                        shape: const StadiumBorder(),
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   Future<void> _startPreset(SessionPreset preset) async {
     // Request permissions before showing the start session dialog.
     final PermissionStatus status = await Permission.notification.status;
@@ -765,93 +854,28 @@ class _PresetListScreenState extends State<PresetListScreen>
       );
     }
 
+    final double width = MediaQuery.sizeOf(context).width;
+    final bool usePhoneLayout = width > _kPhoneBreakpoint;
+    final Widget listContent = _buildPresetListContent();
+
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            const SizedBox(height: 8),
-            Expanded(
-              child: ListView.builder(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: EdgeInsets.fromLTRB(
-                  28,
-                  24,
-                  28,
-                  MediaQuery.of(context).padding.bottom + 12.0,
-                ),
-                itemCount: (_presets.length <= 2 ? 1 : 0) + _presets.length + 1,
-                itemBuilder: (BuildContext context, int index) {
-                  final bool hasLeadingSpacer = _presets.length <= 2;
-                  if (hasLeadingSpacer && index == 0) {
-                    return const SizedBox(height: 8);
-                  }
-                  final int contentIndex = index - (hasLeadingSpacer ? 1 : 0);
-                  if (contentIndex < _presets.length) {
-                    final SessionPreset preset = _presets[contentIndex];
-                    const double listHorizontalPadding = 56; // 28 + 28 from ListView padding
-                    final double cardWidth = (MediaQuery.sizeOf(context).width - listHorizontalPadding).clamp(0.0, double.infinity);
-                    final Widget card = SizedBox(
-                      width: cardWidth,
-                      child: _PresetListItem(
-                        key: ValueKey<String>(preset.id),
-                        preset: preset,
-                        onStart: () => _startPreset(preset),
-                        onEdit: () => _editPreset(preset),
-                        onDelete: () => _deletePreset(preset),
-                      ),
-                    );
-                    final bool showTapHint =
-                        contentIndex == 0 && !_hasStartedSession;
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: showTapHint
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 12),
-                                  child: Text(
-                                    AppLocalizations.of(context)!.tapCardToStartSession,
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.grey.shade500,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                card,
-                              ],
-                            )
-                          : card,
-                    );
-                  }
-
-                  // Footer: centered button that appears as the last list element
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12.0),
-                    child: Center(
-                      child: SizedBox(
-                        height: 44,
-                        child: ElevatedButton.icon(
-                          onPressed: _createPreset,
-                          icon: const Icon(Icons.add),
-                          label: Text(AppLocalizations.of(context)!.newPreset),
-                          style: ElevatedButton.styleFrom(
-                            shape: const StadiumBorder(),
-                            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                          ),
-                        ),
-                      ),
+        child: usePhoneLayout
+            ? Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: _kPhoneMaxContentWidth),
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      top: 32,
+                      left: _kPhoneHorizontalPadding,
+                      right: _kPhoneHorizontalPadding,
                     ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+                    child: listContent,
+                  ),
+                ),
+              )
+            : listContent,
       ),
-      // FAB removed — button is rendered inline as the last list element
     );
   }
 }
@@ -1290,20 +1314,32 @@ class _SessionScreenState extends State<SessionScreen>
       },
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: _state == null
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: CircularTimer(
-                    remaining: _state!.remaining,
-                    total: _state!.stepTotal,
-                    step: _state!.toSessionStep(),
-                  ),
-                ),
+        body: Builder(
+          builder: (BuildContext context) {
+            final double width = MediaQuery.sizeOf(context).width;
+            final bool usePhoneLayout = width > _kPhoneBreakpoint;
+            final double padding = usePhoneLayout ? _kPhoneHorizontalPadding : 12;
+            if (_state == null) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final Widget timer = CircularTimer(
+              remaining: _state!.remaining,
+              total: _state!.stepTotal,
+              step: _state!.toSessionStep(),
+            );
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.all(padding),
+                child: usePhoneLayout
+                    ? ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: _kPhoneMaxContentWidth),
+                        child: timer,
+                      )
+                    : timer,
               ),
+            );
+          },
+        ),
       ),
     );
   }
