@@ -6,7 +6,7 @@
 <h1 align="center">Zazen Timer (Wear OS / Flutter)</h1>
 
 <p align="center">
-  A minimalist Zen meditation timer for Wear OS.
+  A minimalist Zen meditation timer for Wear OS and Android phones.
 </p>
 
 ## Screenshots
@@ -42,22 +42,28 @@
 ```bash
 flutter pub get
 dart run flutter_launcher_icons   # (re)generate app icons
-flutter run
+flutter run --flavor wear        # Wear OS
+flutter run --flavor phone       # Android phone
 ```
 
 You may want to create a separate Android Wear OS module or integrate this `lib/` and `pubspec.yaml` into a full Flutter project created via `flutter create`.
 
-## Build and install release APK on the watch
+## Build and install release APK
+
+The app uses product flavors for Wear OS and phones. Build the flavor you need:
 
 1. **Build the release APK**
 
    From the project directory:
 
    ```bash
-   flutter build apk --release
+   flutter build apk --release --flavor wear   # Wear OS
+   flutter build apk --release --flavor phone  # Android phone
    ```
 
-   The APK is produced at: `build/app/outputs/flutter-apk/app-release.apk`
+   Output paths:
+   - Wear OS: `build/app/outputs/flutter-apk/app-wear-release.apk`
+   - Phone: `build/app/outputs/flutter-apk/app-phone-release.apk`
 
    **Release signing:** When `android/key.properties` and `android/upload-keystore.jks` exist, release builds are signed with that keystore. These files are not committed (see `android/.gitignore`). Without them, the release build falls back to debug signing so the project still builds. The default keystore uses a placeholder password (`changeme`); for production (e.g. Play Store), regenerate the keystore with a strong password (`keytool -genkey -v -keystore android/upload-keystore.jks ...`), update `android/key.properties` with the real passwords, and keep the keystore and passwords in a secure place. For CI, provide them via secrets and inject into the build environment.
 
@@ -92,23 +98,29 @@ You may want to create a separate Android Wear OS module or integrate this `lib/
 
 4. **Install the release APK**
 
-   From the project directory:
+   From the project directory (for Wear OS on a watch):
 
    ```bash
-   adb install -r build/app/outputs/flutter-apk/app-release.apk
+   adb install -r build/app/outputs/flutter-apk/app-wear-release.apk
    ```
 
    The `-r` flag allows replacing an existing install (e.g. a debug build). Open the app from the watch app list.
 
 ### Building an app bundle (AAB) for Play Store
 
-To build a release app bundle:
+Google Play uses separate tracks for Wear OS and phones. Build each flavor and upload to the corresponding track:
 
 ```bash
-flutter build appbundle --release
+# Wear OS track
+flutter build appbundle --release --flavor wear
+
+# Phones & Tablets track
+flutter build appbundle --release --flavor phone
 ```
 
-The AAB is produced at `build/app/outputs/bundle/release/app-release.aab`.
+Output paths:
+- Wear OS: `build/app/outputs/bundle/wearRelease/app-wear-release.aab` → upload to **Wear OS only** track
+- Phone: `build/app/outputs/bundle/phoneRelease/app-phone-release.aab` → upload to **Phones, Tablets, …** track
 
 If you see **"Release app bundle failed to strip debug symbols from native libraries"**:
 

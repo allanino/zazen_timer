@@ -39,6 +39,16 @@ android {
         versionName = flutter.versionName
     }
 
+    flavorDimensions += "formfactor"
+    productFlavors {
+        create("wear") {
+            dimension = "formfactor"
+        }
+        create("phone") {
+            dimension = "formfactor"
+        }
+    }
+
     signingConfigs {
         if (keystorePropertiesFile.exists()) {
             create("release") {
