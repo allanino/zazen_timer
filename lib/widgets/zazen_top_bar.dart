@@ -8,7 +8,7 @@ class ZazenTopBar extends StatelessWidget {
     return Material(
       color: Colors.black,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(vertical: 6),
         child: Center(
           child: Row(
             mainAxisSize: MainAxisSize.min,

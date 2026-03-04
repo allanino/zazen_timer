@@ -571,6 +571,8 @@ class _PresetListScreenState extends State<PresetListScreen>
   Widget _buildPresetListContent() {
     final double width = MediaQuery.sizeOf(context).width;
     final bool usePhoneLayout = width > _kPhoneBreakpoint;
+    final double listHorizontalPadding = usePhoneLayout ? 0 : 28;
+    final double listTopPadding = usePhoneLayout ? 12 : 24;
     return Column(
       children: <Widget>[
         const SizedBox(height: 8),
@@ -578,9 +580,9 @@ class _PresetListScreenState extends State<PresetListScreen>
           child: ListView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.fromLTRB(
-              usePhoneLayout ? 0 : 28,
-              usePhoneLayout ? 0 : 24,
-              usePhoneLayout ? 0 : 28,
+              listHorizontalPadding,
+              listTopPadding,
+              listHorizontalPadding,
               MediaQuery.of(context).padding.bottom + 12.0,
             ),
             itemCount: (_presets.length <= 2 ? 1 : 0) + _presets.length + 1,
@@ -875,9 +877,9 @@ class _PresetListScreenState extends State<PresetListScreen>
         child: usePhoneLayout
             ? Column(
                 children: <Widget>[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   const ZazenTopBar(),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
                   Expanded(
                     child: Center(
                       child: ConstrainedBox(
