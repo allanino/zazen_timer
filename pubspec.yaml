@@ -2,7 +2,7 @@ name: zazen_timer
 description: A zazen timer built with Flutter targeting Wear OS first, then phones.
 publish_to: "none"
 
-version: 0.3.7+11
+version: 0.3.7+12
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
