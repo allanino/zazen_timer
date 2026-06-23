@@ -24,9 +24,7 @@ class PresetStore {
   Future<void> savePresets(List<SessionPreset> presets) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String raw = jsonEncode(
-      presets
-          .map<Map<String, dynamic>>((SessionPreset p) => p.toJson())
-          .toList(),
+      presets.map<Map<String, dynamic>>((SessionPreset p) => p.toJson()).toList(),
     );
     await prefs.setString(_key, raw);
   }

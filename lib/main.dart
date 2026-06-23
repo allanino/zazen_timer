@@ -148,8 +148,7 @@ class _PresetListScreenState extends State<PresetListScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _loadPresets();
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) => _restoreSessionIfRunning());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _restoreSessionIfRunning());
   }
 
   @override
@@ -165,8 +164,7 @@ class _PresetListScreenState extends State<PresetListScreen>
     if (pending != null) {
       SessionService.canScheduleExactAlarms().then((bool granted) {
         if (!mounted) return;
-        if (!granted)
-          return; // Keep pending so next resume (after user grants in settings) can start
+        if (!granted) return; // Keep pending so next resume (after user grants in settings) can start
         setState(() => _pendingPresetAfterExactAlarm = null);
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
@@ -181,8 +179,7 @@ class _PresetListScreenState extends State<PresetListScreen>
   Future<void> _saveOngoingSessionPreset(SessionPreset preset) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString(
-          _kOngoingSessionPresetKey, jsonEncode(preset.toJson()));
+      await prefs.setString(_kOngoingSessionPresetKey, jsonEncode(preset.toJson()));
     } catch (_) {}
   }
 
@@ -231,8 +228,7 @@ class _PresetListScreenState extends State<PresetListScreen>
                     ),
                     child: Center(
                       child: Padding(
-                        padding: const EdgeInsets.only(
-                            left: 20, right: 20, top: 32, bottom: 36),
+                        padding: const EdgeInsets.only(left: 20, right: 20, top: 32, bottom: 36),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
@@ -242,10 +238,8 @@ class _PresetListScreenState extends State<PresetListScreen>
                               style: const TextStyle(color: Colors.white),
                             ),
                             LayoutBuilder(
-                              builder: (BuildContext context,
-                                  BoxConstraints constraints) {
-                                final spacing =
-                                    constraints.maxWidth < 300 ? 16.0 : 28.0;
+                              builder: (BuildContext context, BoxConstraints constraints) {
+                                final spacing = constraints.maxWidth < 300 ? 16.0 : 28.0;
                                 return Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: <Widget>[
@@ -254,45 +248,28 @@ class _PresetListScreenState extends State<PresetListScreen>
                                       fit: BoxFit.scaleDown,
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
+                                        mainAxisAlignment: MainAxisAlignment.center,
                                         children: <Widget>[
                                           TextButton(
-                                            onPressed: () =>
-                                                Navigator.of(context)
-                                                    .pop('now'),
+                                            onPressed: () => Navigator.of(context).pop('now'),
                                             style: TextButton.styleFrom(
-                                              backgroundColor:
-                                                  Colors.transparent,
+                                              backgroundColor: Colors.transparent,
                                               shape: const StadiumBorder(),
-                                              tapTargetSize:
-                                                  MaterialTapTargetSize
-                                                      .shrinkWrap,
+                                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                               minimumSize: Size.zero,
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 10),
+                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                                             ),
                                             child: Text(l10n.now),
                                           ),
                                           const SizedBox(width: 8),
                                           TextButton(
-                                            onPressed: () =>
-                                                Navigator.of(context)
-                                                    .pop('time'),
+                                            onPressed: () => Navigator.of(context).pop('time'),
                                             style: TextButton.styleFrom(
-                                              backgroundColor:
-                                                  Colors.transparent,
+                                              backgroundColor: Colors.transparent,
                                               shape: const StadiumBorder(),
-                                              tapTargetSize:
-                                                  MaterialTapTargetSize
-                                                      .shrinkWrap,
+                                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                               minimumSize: Size.zero,
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 10),
+                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                                             ),
                                             child: Text(l10n.schedule),
                                           ),
@@ -323,10 +300,11 @@ class _PresetListScreenState extends State<PresetListScreen>
     if (choice == 'time') {
       final DateTime now = DateTime.now();
       // Round up to the next full minute (e.g. 15:03:32 -> 15:04:00).
-      final int initialMinute =
-          (now.second == 0 && now.millisecond == 0 && now.microsecond == 0)
-              ? now.minute
-              : now.minute + 1;
+      final int initialMinute = (now.second == 0 &&
+              now.millisecond == 0 &&
+              now.microsecond == 0)
+          ? now.minute
+          : now.minute + 1;
       final DateTime rounded = DateTime(
         now.year,
         now.month,
@@ -348,8 +326,10 @@ class _PresetListScreenState extends State<PresetListScreen>
         ),
       );
       if (!mounted || result == null) return;
-      final int secondsOfDay = result.$1 * 3600 + result.$2 * 60 + result.$3;
-      final int nowSeconds = now.hour * 3600 + now.minute * 60 + now.second;
+      final int secondsOfDay =
+          result.$1 * 3600 + result.$2 * 60 + result.$3;
+      final int nowSeconds =
+          now.hour * 3600 + now.minute * 60 + now.second;
       int diffSeconds = secondsOfDay - nowSeconds;
       if (diffSeconds < 0) diffSeconds += 24 * 3600;
 
@@ -477,8 +457,7 @@ class _PresetListScreenState extends State<PresetListScreen>
   }
 
   Future<void> _editPreset(SessionPreset preset) async {
-    final SessionPreset? edited =
-        await Navigator.of(context).push<SessionPreset>(
+    final SessionPreset? edited = await Navigator.of(context).push<SessionPreset>(
       MaterialPageRoute<SessionPreset>(
         builder: (BuildContext context) => PresetEditScreen(preset: preset),
       ),
@@ -486,9 +465,7 @@ class _PresetListScreenState extends State<PresetListScreen>
 
     if (edited != null) {
       setState(() {
-        _presets = _presets
-            .map((SessionPreset p) => p.id == edited.id ? edited : p)
-            .toList();
+        _presets = _presets.map((SessionPreset p) => p.id == edited.id ? edited : p).toList();
       });
       await _store.savePresets(_presets);
     }
@@ -517,78 +494,59 @@ class _PresetListScreenState extends State<PresetListScreen>
                     ),
                     child: Center(
                       child: Padding(
-                        padding: const EdgeInsets.only(
-                            left: 20, right: 20, top: 32, bottom: 36),
+                        padding: const EdgeInsets.only(left: 20, right: 20, top: 32, bottom: 36),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
                             Text(
                               l10n.deletePresetConfirm(preset.breakdownLabel),
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                            LayoutBuilder(
-                              builder: (BuildContext context,
-                                  BoxConstraints constraints) {
-                                final spacing =
-                                    constraints.maxWidth < 300 ? 16.0 : 28.0;
-                                return Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    SizedBox(height: spacing),
-                                    FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: <Widget>[
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.of(context)
-                                                    .pop(false),
-                                            style: TextButton.styleFrom(
-                                              backgroundColor:
-                                                  Colors.transparent,
-                                              shape: const StadiumBorder(),
-                                              tapTargetSize:
-                                                  MaterialTapTargetSize
-                                                      .shrinkWrap,
-                                              minimumSize: Size.zero,
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 10),
-                                            ),
-                                            child: Text(l10n.cancel),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.of(context).pop(true),
-                                            style: TextButton.styleFrom(
-                                              backgroundColor:
-                                                  Colors.transparent,
-                                              foregroundColor: kDeleteColor,
-                                              shape: const StadiumBorder(),
-                                              tapTargetSize:
-                                                  MaterialTapTargetSize
-                                                      .shrinkWrap,
-                                              minimumSize: Size.zero,
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 10),
-                                            ),
-                                            child: Text(l10n.delete),
-                                          ),
-                                        ],
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        LayoutBuilder(
+                          builder: (BuildContext context, BoxConstraints constraints) {
+                            final spacing = constraints.maxWidth < 300 ? 16.0 : 28.0;
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                SizedBox(height: spacing),
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(false),
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          shape: const StadiumBorder(),
+                                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                          minimumSize: Size.zero,
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                        ),
+                                        child: Text(l10n.cancel),
                                       ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
+                                      const SizedBox(width: 8),
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(true),
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          foregroundColor: kDeleteColor,
+                                          shape: const StadiumBorder(),
+                                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                          minimumSize: Size.zero,
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                        ),
+                                        child: Text(l10n.delete),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
                           ],
                         ),
                       ),
@@ -604,8 +562,7 @@ class _PresetListScreenState extends State<PresetListScreen>
 
     if (confirmed == true) {
       setState(() {
-        _presets =
-            _presets.where((SessionPreset p) => p.id != preset.id).toList();
+        _presets = _presets.where((SessionPreset p) => p.id != preset.id).toList();
       });
       await _store.savePresets(_presets);
     }
@@ -660,8 +617,7 @@ class _PresetListScreenState extends State<PresetListScreen>
                             Padding(
                               padding: const EdgeInsets.only(top: 12),
                               child: Text(
-                                AppLocalizations.of(context)!
-                                    .tapCardToStartSession,
+                                AppLocalizations.of(context)!.tapCardToStartSession,
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: Colors.grey.shade500,
@@ -726,8 +682,7 @@ class _PresetListScreenState extends State<PresetListScreen>
                       ),
                       child: Center(
                         child: Padding(
-                          padding: const EdgeInsets.only(
-                              left: 20, right: 20, top: 20, bottom: 48),
+                          padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 48),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
@@ -737,10 +692,8 @@ class _PresetListScreenState extends State<PresetListScreen>
                                 style: const TextStyle(color: Colors.white),
                               ),
                               LayoutBuilder(
-                                builder: (BuildContext context,
-                                    BoxConstraints constraints) {
-                                  final spacing =
-                                      constraints.maxWidth < 300 ? 16.0 : 28.0;
+                                builder: (BuildContext context, BoxConstraints constraints) {
+                                  final spacing = constraints.maxWidth < 300 ? 16.0 : 28.0;
                                   return Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: <Widget>[
@@ -749,25 +702,16 @@ class _PresetListScreenState extends State<PresetListScreen>
                                         fit: BoxFit.scaleDown,
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
+                                          mainAxisAlignment: MainAxisAlignment.center,
                                           children: <Widget>[
                                             TextButton(
-                                              onPressed: () =>
-                                                  Navigator.of(context)
-                                                      .pop(false),
+                                              onPressed: () => Navigator.of(context).pop(false),
                                               style: TextButton.styleFrom(
-                                                backgroundColor:
-                                                    Colors.transparent,
+                                                backgroundColor: Colors.transparent,
                                                 shape: const StadiumBorder(),
-                                                tapTargetSize:
-                                                    MaterialTapTargetSize
-                                                        .shrinkWrap,
+                                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                                 minimumSize: Size.zero,
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 12,
-                                                        vertical: 10),
+                                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                                               ),
                                               child: Text(permL10n.cancel),
                                             ),
@@ -775,25 +719,16 @@ class _PresetListScreenState extends State<PresetListScreen>
                                             TextButton(
                                               onPressed: () async {
                                                 final PermissionStatus result =
-                                                    await Permission
-                                                        .notification
-                                                        .request();
+                                                    await Permission.notification.request();
                                                 if (!context.mounted) return;
-                                                Navigator.of(context)
-                                                    .pop(result.isGranted);
+                                                Navigator.of(context).pop(result.isGranted);
                                               },
                                               style: TextButton.styleFrom(
-                                                backgroundColor:
-                                                    Colors.transparent,
+                                                backgroundColor: Colors.transparent,
                                                 shape: const StadiumBorder(),
-                                                tapTargetSize:
-                                                    MaterialTapTargetSize
-                                                        .shrinkWrap,
+                                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                                 minimumSize: Size.zero,
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 12,
-                                                        vertical: 10),
+                                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                                               ),
                                               child: Text(permL10n.grant),
                                             ),
@@ -846,8 +781,7 @@ class _PresetListScreenState extends State<PresetListScreen>
                       ),
                       child: Center(
                         child: Padding(
-                          padding: const EdgeInsets.only(
-                              left: 20, right: 20, top: 20, bottom: 48),
+                          padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 48),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
@@ -857,10 +791,8 @@ class _PresetListScreenState extends State<PresetListScreen>
                                 style: const TextStyle(color: Colors.white),
                               ),
                               LayoutBuilder(
-                                builder: (BuildContext context,
-                                    BoxConstraints constraints) {
-                                  final spacing =
-                                      constraints.maxWidth < 300 ? 16.0 : 28.0;
+                                builder: (BuildContext context, BoxConstraints constraints) {
+                                  final spacing = constraints.maxWidth < 300 ? 16.0 : 28.0;
                                   return Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: <Widget>[
@@ -869,50 +801,34 @@ class _PresetListScreenState extends State<PresetListScreen>
                                         fit: BoxFit.scaleDown,
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
+                                          mainAxisAlignment: MainAxisAlignment.center,
                                           children: <Widget>[
                                             TextButton(
                                               onPressed: () {
-                                                setState(() =>
-                                                    _pendingPresetAfterExactAlarm =
-                                                        null);
+                                                setState(() => _pendingPresetAfterExactAlarm = null);
                                                 Navigator.of(context).pop();
                                               },
                                               style: TextButton.styleFrom(
-                                                backgroundColor:
-                                                    Colors.transparent,
+                                                backgroundColor: Colors.transparent,
                                                 shape: const StadiumBorder(),
-                                                tapTargetSize:
-                                                    MaterialTapTargetSize
-                                                        .shrinkWrap,
+                                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                                 minimumSize: Size.zero,
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 12,
-                                                        vertical: 10),
+                                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                                               ),
                                               child: Text(permL10n.cancel),
                                             ),
                                             const SizedBox(width: 8),
                                             TextButton(
                                               onPressed: () {
-                                                SessionService
-                                                    .openExactAlarmSettings();
+                                                SessionService.openExactAlarmSettings();
                                                 Navigator.of(context).pop();
                                               },
                                               style: TextButton.styleFrom(
-                                                backgroundColor:
-                                                    Colors.transparent,
+                                                backgroundColor: Colors.transparent,
                                                 shape: const StadiumBorder(),
-                                                tapTargetSize:
-                                                    MaterialTapTargetSize
-                                                        .shrinkWrap,
+                                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                                 minimumSize: Size.zero,
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 12,
-                                                        vertical: 10),
+                                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                                               ),
                                               child: Text(permL10n.grant),
                                             ),
@@ -1015,7 +931,8 @@ class _PresetListItemState extends State<_PresetListItem> {
 
   void _handleHorizontalDragUpdate(DragUpdateDetails details) {
     setState(() {
-      _dragOffset = (_dragOffset + details.delta.dx).clamp(-_maxReveal, 0.0);
+      _dragOffset = (_dragOffset + details.delta.dx)
+          .clamp(-_maxReveal, 0.0);
     });
   }
 
@@ -1061,8 +978,7 @@ class _PresetListItemState extends State<_PresetListItem> {
       widget.onStart();
     }
   }
-
-  void _handleEditTap() {
+    void _handleEditTap() {
     setState(() {
       _dragOffset = 0;
     });
@@ -1075,6 +991,7 @@ class _PresetListItemState extends State<_PresetListItem> {
     });
     widget.onDelete();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -1103,29 +1020,28 @@ class _PresetListItemState extends State<_PresetListItem> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 Expanded(
-                    child: Semantics(
-                  button: true,
-                  label: AppLocalizations.of(context)!.editPreset,
-                  child: _ActionButton(
-                    backgroundColor: const Color(0xFF262B32),
-                    iconColor: kAccentColor,
-                    icon: Icons.edit,
-                    onTap: _handleEditTap,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      bottomLeft: Radius.circular(16),
+                  child: Semantics(
+                    button: true,
+                    label: AppLocalizations.of(context)!.editPreset,
+                    child: _ActionButton(
+                      backgroundColor: const Color(0xFF262B32),
+                      iconColor: kAccentColor,
+                      icon: Icons.edit,
+                      onTap: _handleEditTap,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        bottomLeft: Radius.circular(16),
+                      ),
                     ),
-                  ),
-                )),
+                  )
+                ),
                 SizedBox(
                   width: 2,
                   child: LayoutBuilder(
-                    builder:
-                        (BuildContext context, BoxConstraints constraints) {
+                    builder: (BuildContext context, BoxConstraints constraints) {
                       final double h = constraints.maxHeight * 0.8;
                       return Container(
-                        color:
-                            const Color(0xFF262B32), // same as pill background
+                        color: const Color(0xFF262B32), // same as pill background
                         alignment: Alignment.center,
                         child: Container(
                           width: 1,
@@ -1137,20 +1053,21 @@ class _PresetListItemState extends State<_PresetListItem> {
                   ),
                 ),
                 Expanded(
-                    child: Semantics(
-                  button: true,
-                  label: AppLocalizations.of(context)!.deletePreset,
-                  child: _ActionButton(
-                    backgroundColor: const Color(0xFF262B32),
-                    iconColor: kDeleteColor,
-                    icon: Icons.delete,
-                    onTap: _handleDeleteTap,
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(16),
-                      bottomRight: Radius.circular(16),
+                  child: Semantics(
+                    button: true,
+                    label: AppLocalizations.of(context)!.deletePreset,
+                    child: _ActionButton(
+                      backgroundColor: const Color(0xFF262B32),
+                      iconColor: kDeleteColor,
+                      icon: Icons.delete,
+                      onTap: _handleDeleteTap,
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(16),
+                        bottomRight: Radius.circular(16),
+                      ),
                     ),
-                  ),
-                )),
+                  )
+                ),
               ],
             ),
           ),
@@ -1199,8 +1116,7 @@ class _PresetListItemState extends State<_PresetListItem> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              AppLocalizations.of(context)!.minutesTotal(
-                                  widget.preset.displayMinutesTotal),
+                              AppLocalizations.of(context)!.minutesTotal(widget.preset.displayMinutesTotal),
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.grey.shade400,
@@ -1346,82 +1262,58 @@ class _SessionScreenState extends State<SessionScreen>
                     ),
                     child: Center(
                       child: Padding(
-                        padding: const EdgeInsets.only(
-                            left: 20, right: 20, top: 32, bottom: 36),
+                        padding: const EdgeInsets.only(left: 20, right: 20, top: 32, bottom: 36),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
                             Text(
-                              AppLocalizations.of(context)!
-                                  .goingBackStopsSession,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                            LayoutBuilder(
-                              builder: (BuildContext context,
-                                  BoxConstraints constraints) {
-                                final spacing =
-                                    constraints.maxWidth < 300 ? 16.0 : 28.0;
-                                return Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    SizedBox(height: spacing),
-                                    FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: <Widget>[
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.of(context)
-                                                    .pop(false),
-                                            style: TextButton.styleFrom(
-                                              backgroundColor:
-                                                  Colors.transparent,
-                                              shape: const StadiumBorder(),
-                                              tapTargetSize:
-                                                  MaterialTapTargetSize
-                                                      .shrinkWrap,
-                                              minimumSize: Size.zero,
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 10),
-                                            ),
-                                            child: Text(
-                                                AppLocalizations.of(context)!
-                                                    .cancel),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.of(context).pop(true),
-                                            style: TextButton.styleFrom(
-                                              backgroundColor:
-                                                  Colors.transparent,
-                                              shape: const StadiumBorder(),
-                                              tapTargetSize:
-                                                  MaterialTapTargetSize
-                                                      .shrinkWrap,
-                                              minimumSize: Size.zero,
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 10),
-                                            ),
-                                            child: Text(
-                                                AppLocalizations.of(context)!
-                                                    .stop),
-                                          ),
-                                        ],
+                              AppLocalizations.of(context)!.goingBackStopsSession,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        LayoutBuilder(
+                          builder: (BuildContext context, BoxConstraints constraints) {
+                            final spacing = constraints.maxWidth < 300 ? 16.0 : 28.0;
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                SizedBox(height: spacing),
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(false),
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          shape: const StadiumBorder(),
+                                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                          minimumSize: Size.zero,
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                        ),
+                                        child: Text(AppLocalizations.of(context)!.cancel),
                                       ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
+                                      const SizedBox(width: 8),
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(true),
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          shape: const StadiumBorder(),
+                                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                          minimumSize: Size.zero,
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                        ),
+                                        child: Text(AppLocalizations.of(context)!.stop),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
                           ],
                         ),
                       ),
@@ -1458,8 +1350,7 @@ class _SessionScreenState extends State<SessionScreen>
           builder: (BuildContext context) {
             final double width = MediaQuery.sizeOf(context).width;
             final bool usePhoneLayout = width > _kPhoneBreakpoint;
-            final double padding =
-                usePhoneLayout ? _kPhoneHorizontalPadding : 12;
+            final double padding = usePhoneLayout ? _kPhoneHorizontalPadding : 12;
             if (_state == null) {
               return const Center(child: CircularProgressIndicator());
             }
@@ -1477,8 +1368,8 @@ class _SessionScreenState extends State<SessionScreen>
                     padding: EdgeInsets.all(padding),
                     child: usePhoneLayout
                         ? ConstrainedBox(
-                            constraints: BoxConstraints(
-                                maxWidth: _kPhoneMaxContentWidth),
+                            constraints:
+                                BoxConstraints(maxWidth: _kPhoneMaxContentWidth),
                             child: timer,
                           )
                         : timer,

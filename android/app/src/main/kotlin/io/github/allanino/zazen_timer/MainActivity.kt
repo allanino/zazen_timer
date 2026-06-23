@@ -6,12 +6,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import androidx.wear.remote.interactions.RemoteActivityHelper
-import com.google.android.gms.wearable.Wearable
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-import java.util.concurrent.Executors
 
 class MainActivity : FlutterActivity() {
 
@@ -51,30 +48,9 @@ class MainActivity : FlutterActivity() {
             openExactAlarmSettings()
             result.success(null)
           }
-          "installOnWatch" -> {
-            val apkUrl = call.argument<String>("apkUrl")
-            if (apkUrl != null) {
-              installOnWatch(apkUrl)
-              result.success(null)
-            } else {
-              result.error("INVALID_ARGUMENT", "apkUrl is required", null)
-            }
-          }
           else -> result.notImplemented()
         }
       }
-  }
-
-  private fun installOnWatch(apkPath: String) {
-    val fileUri = Uri.fromFile(java.io.File(apkPath))
-    val channelClient = Wearable.getChannelClient(this)
-    Wearable.getNodeClient(this).connectedNodes.addOnSuccessListener { nodes ->
-      for (node in nodes) {
-        channelClient.openChannel(node.id, "/install_apk").addOnSuccessListener { channel ->
-            channelClient.sendFile(channel, fileUri)
-        }
-      }
-    }
   }
 
   private fun canScheduleExactAlarms(): Boolean {

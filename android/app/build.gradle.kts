@@ -82,10 +82,3 @@ flutter {
 tasks.withType<JavaCompile>().configureEach {
     options.compilerArgs.add("-Xlint:-options")
 }
-dependencies {
-    implementation("com.google.android.gms:play-services-wearable:18.1.0")
-}
-
-dependencies {
-    implementation("androidx.wear:wear-remote-interactions:1.0.0")
-}

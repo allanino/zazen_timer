@@ -24,12 +24,10 @@ class CircularTimer extends StatelessWidget {
     const double kPhoneBreakpoint = 360;
     const double baseStrokeWidth = 12.0;
     final bool isPhone = size.width > kPhoneBreakpoint;
-    final double strokeWidth =
-        isPhone ? baseStrokeWidth * 1.25 : baseStrokeWidth;
+    final double strokeWidth = isPhone ? baseStrokeWidth * 1.25 : baseStrokeWidth;
 
-    final double fraction = total.inMilliseconds == 0
-        ? 0.0
-        : remaining.inMilliseconds / total.inMilliseconds;
+    final double fraction =
+        total.inMilliseconds == 0 ? 0.0 : remaining.inMilliseconds / total.inMilliseconds;
     final int totalSeconds = (remaining.inMilliseconds / 1000).round();
     final int minutes = totalSeconds ~/ 60;
     final int seconds = totalSeconds % 60;
@@ -87,6 +85,7 @@ class _RingPainter extends CustomPainter {
     const Color baseColor = Color.fromARGB(255, 85, 89, 92);
     const Color brighterColor = Color(0xFF989DA3);
 
+
     final Offset center = size.center(Offset.zero);
     final double radius = (size.shortestSide / 2) - radiusPadding;
     final Rect rect = Rect.fromCircle(center: center, radius: radius);
@@ -115,10 +114,8 @@ class _RingPainter extends CustomPainter {
     // Blend the bright core towards baseColor as the arc shrinks,
     // so the gradient fades out naturally instead of switching abruptly.
     final double t = math.pow(clampedFraction.clamp(0.0, 1.0), 0.75).toDouble();
-    final Color coreColor =
-        Color.lerp(baseColor, brighterColor.withOpacity(0.95), t)!;
-    final Color trailColor =
-        Color.lerp(baseColor, baseColor.withOpacity(0.1), t)!;
+    final Color coreColor = Color.lerp(baseColor, brighterColor.withOpacity(0.95), t)!;
+    final Color trailColor = Color.lerp(baseColor, baseColor.withOpacity(0.1), t)!;
 
     {
       const double capStop = 0.02;
@@ -182,6 +179,5 @@ class _RingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _RingPainter oldDelegate) =>
-      oldDelegate.fraction != fraction ||
-      oldDelegate.strokeWidth != strokeWidth;
+      oldDelegate.fraction != fraction || oldDelegate.strokeWidth != strokeWidth;
 }
