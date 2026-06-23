@@ -44,7 +44,7 @@ class _ZazenTopBarState extends State<ZazenTopBar> {
           final apkResponse = await http.get(Uri.parse(apkUrl));
           if (apkResponse.statusCode == 200) {
             final tempDir = await getTemporaryDirectory();
-            final file = File('\${tempDir.path}/wear_app.apk');
+            final file = File('${tempDir.path}/zazen-timer-wear-os.apk');
             await file.writeAsBytes(apkResponse.bodyBytes);
 
             // Transfer to watch via Native Channel
@@ -70,7 +70,7 @@ class _ZazenTopBarState extends State<ZazenTopBar> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: \$e')),
+          SnackBar(content: Text('Failed: $e')),
         );
       }
     } finally {
