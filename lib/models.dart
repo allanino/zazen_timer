@@ -59,7 +59,8 @@ class SessionPreset {
 
   int get displayMinutesTotal => displaySteps.fold<int>(
         0,
-        (int sum, SessionStep step) => sum + SessionPreset._roundedMinutes(step.duration),
+        (int sum, SessionStep step) =>
+            sum + SessionPreset._roundedMinutes(step.duration),
       );
 
   String get breakdownLabel {
@@ -68,7 +69,8 @@ class SessionPreset {
     }
     return displaySteps
         .map<String>(
-          (SessionStep step) => SessionPreset._roundedMinutes(step.duration).toString(),
+          (SessionStep step) =>
+              SessionPreset._roundedMinutes(step.duration).toString(),
         )
         .join(' + ');
   }
@@ -76,7 +78,9 @@ class SessionPreset {
   Map<String, dynamic> toJson() => <String, dynamic>{
         'id': id,
         'name': name,
-        'steps': steps.map<Map<String, dynamic>>((SessionStep s) => s.toJson()).toList(),
+        'steps': steps
+            .map<Map<String, dynamic>>((SessionStep s) => s.toJson())
+            .toList(),
       };
 
   factory SessionPreset.fromJson(Map<String, dynamic> json) => SessionPreset(
@@ -107,15 +111,15 @@ String buildPresetNameFromSteps(
 
   final String breakdown = effectiveSteps
       .map<String>(
-        (SessionStep step) => _roundedMinutesFromDuration(step.duration).toString(),
+        (SessionStep step) =>
+            _roundedMinutesFromDuration(step.duration).toString(),
       )
       .join(' + ');
   final int totalMinutes = effectiveSteps.fold<int>(
     0,
-    (int sum, SessionStep step) => sum + _roundedMinutesFromDuration(step.duration),
+    (int sum, SessionStep step) =>
+        sum + _roundedMinutesFromDuration(step.duration),
   );
 
   return withTotal(breakdown, totalMinutes);
 }
-
-

@@ -125,7 +125,8 @@ class SessionService {
       return _localRunner.currentState;
     }
     try {
-      final dynamic raw = await _channel.invokeMethod<dynamic>('getSessionState');
+      final dynamic raw =
+          await _channel.invokeMethod<dynamic>('getSessionState');
       if (raw == null || raw is! Map) return null;
       final Map<dynamic, dynamic> map = raw;
       final int stepIndex = map['stepIndex'] as int? ?? 0;

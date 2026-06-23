@@ -22,7 +22,8 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
     super.initState();
     if (widget.preset != null) {
       for (final SessionStep s in widget.preset!.steps) {
-        _steps.add(_EditableStep(type: s.type, totalSeconds: s.duration.inSeconds));
+        _steps.add(
+            _EditableStep(type: s.type, totalSeconds: s.duration.inSeconds));
       }
     } else {
       _steps.addAll(<_EditableStep>[
@@ -189,11 +190,12 @@ class _PresetEditScreenState extends State<PresetEditScreen> {
                           final (int, int, int)? result =
                               await Navigator.of(context).push<(int, int, int)>(
                             MaterialPageRoute<(int, int, int)>(
-                              builder: (BuildContext context) => TimePickerScreen(
-                                title: AppLocalizations.of(context)!.setDuration,
+                              builder: (BuildContext context) =>
+                                  TimePickerScreen(
+                                title:
+                                    AppLocalizations.of(context)!.setDuration,
                                 initialHour: step.totalSeconds ~/ 3600,
-                                initialMinute:
-                                    (step.totalSeconds % 3600) ~/ 60,
+                                initialMinute: (step.totalSeconds % 3600) ~/ 60,
                                 initialSecond: step.totalSeconds % 60,
                               ),
                             ),
@@ -314,4 +316,3 @@ class _EditableStep {
     return '${totalMinutes}m';
   }
 }
-
